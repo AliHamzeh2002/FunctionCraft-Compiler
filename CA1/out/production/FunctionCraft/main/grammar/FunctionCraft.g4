@@ -1,132 +1,19 @@
 grammar FunctionCraft;
 
-function_craft
-    : (function | comment)* main comment*
-    ;
+// Lexer rules
+// The lexer rules define patterns for recognizing tokens like numbers, booleans, strings,
+// comments, keywords, identifiers, and operators in the input text. These rules are used
+// by the lexer to break the input into a token stream.
 
-comment
-    : SINGLELINECOMMENT
-    | MULTILINECOMMENT
-    ;
+// TODO
 
-main:
-    DEF
-    MAIN
-    LPAR
-    RPAR
-    body_function
-    END
-    ;
+// Parser rules
+// The parser rules start with the program rule, which defines the overall structure of a
+// valid program. They then specify how tokens can be combined to form declarations, control
+// structures, expressions, assignments, function calls, and other constructs within a program.
+// The parser rules collectively define the syntax of the language.
 
-body_function
-    : (statement | comment)*
-    ;
-
-
-function:
-    DEF
-    IDENTIFIER
-    LPAR
-    function_args
-    RPAR
-    body_function
-    END
-    ;
-
-function_args:
-    ((IDENTIFIER COMMA)*
-    ((LBRACKET (IDENTIFIER ASSIGN primitive_val COMMA)* (IDENTIFIER ASSIGN primitive_val) RBRACKET)?
-     | (IDENTIFIER)))?
-    ;
-
-lambda_function:
-    ARROW
-    LPAR
-    function_args
-    RPAR
-    LBRACE
-    body_function
-    RBRACE
-    ;
-
-primitive_value
-    : INT_VAL
-    | FLOAT_VAL
-    | STRING_VAL
-    | BOOLEAN_VAL
-    | lambda_function
-    | list_primitive
-    ;
-
-list_primitive:
-    LBRACKET (primitive_value COMMA)* primitive_value RBRACKET
-    ;
-
-list:
-    LBRACKET
-    (list_value COMMA)*
-    list_value
-    RBRACKET
-    ;
-
-list_value:
-          primitive_value
-          | IDENTIFIER
-          | list
-          ;
-
-range:
-    LPAR
-    IDENTIFIER | INT_VAL
-    DOUBLEDOT
-    IDENTIFIER | INT_VAL
-    RPAR
-    ;
-
-loop:
-    LOOP
-    DO
-    loop_structure
-    END
-    ;
-
-for:
-    FOR
-    IDENTIFIER
-    IN
-    list | IDENTIFIER | range
-    loop_structure
-    END
-    ;
-
-function_ptr:
-    METHOD
-    LPAR
-    COLON
-    IDENTIFIER
-    RPAR
-
-
-def f()
-
-//statement
-//    : (print
-//    | returnf
-//    | declaration
-//    | assignment
-//    | initialization
-//    | initialization_array
-//    | function_call
-//    | predicate_def) SEMICOLON
-//    | forloop
-//    | implication
-//    ;
-
-
-
-
-
-
+// TODO
 
 // Keywords
 END:       'end';
@@ -224,7 +111,6 @@ LBRACE:    '{';
 RBRACE:    '}';
 COMMA:     ',';
 DOT:       '.';
-DOUBLEDOT: '..';
 COLON:     ':';
 SEMICOLON: ';';
 QUESTION:  '?';

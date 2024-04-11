@@ -1,12 +1,12 @@
 grammar FunctionCraft;
 
 function_craft
-    : (function | comment)* main comment*
+    : (function | comment | pattern)* main comment*
     ;
 
 comment
-    : SINGLELINECOMMENT
-    | MULTILINECOMMENT
+    : SINGLE_LINE_COMMENT
+    | MULTI_LINE_COMMENT
     ;
 
 main:
@@ -14,14 +14,41 @@ main:
     MAIN
     LPAR
     RPAR
-    body_function
+    function_scope
     END
     ;
 
-body_function
-    : (statement | comment)*
+pattern:
+    PATTERN
+    IDENTIFIER
+    LPAR
+    (
+    IDENTIFIER
+        (
+        COMMA
+        IDENTIFIER
+        )*
+    )?
+    RPAR
+    PATTERN_TOKEN
+    []
+    ASSIGN
+    expr
     ;
 
+
+
+
+function_scope
+    : (statement | comment)*
+      (return_statement)?
+    ;
+
+return_statement
+    : RETURN
+      (expr)?
+      SEMICOLON
+    ;
 
 function:
     DEF
@@ -29,13 +56,13 @@ function:
     LPAR
     function_args
     RPAR
-    body_function
+    function_scope
     END
     ;
 
 function_args:
     ((IDENTIFIER COMMA)*
-    ((LBRACKET (IDENTIFIER ASSIGN primitive_val COMMA)* (IDENTIFIER ASSIGN primitive_val) RBRACKET)?
+    ((LBRACKET (IDENTIFIER ASSIGN expr COMMA)* (IDENTIFIER ASSIGN expr) RBRACKET)?
      | (IDENTIFIER)))?
     ;
 
@@ -45,7 +72,7 @@ lambda_function:
     function_args
     RPAR
     LBRACE
-    body_function
+    function_scope
     RBRACE
     ;
 
@@ -55,25 +82,20 @@ primitive_value
     | STRING_VAL
     | BOOLEAN_VAL
     | lambda_function
-    | list_primitive
-    ;
-
-list_primitive:
-    LBRACKET (primitive_value COMMA)* primitive_value RBRACKET
     ;
 
 list:
     LBRACKET
-    (list_value COMMA)*
-    list_value
+    (expr COMMA)*
+    expr
     RBRACKET
     ;
 
-list_value:
-          primitive_value
-          | IDENTIFIER
-          | list
-          ;
+//list_value:
+//      primitive_value
+//      | IDENTIFIER
+//      | list
+//      ;
 
 range:
     LPAR
@@ -83,21 +105,93 @@ range:
     RPAR
     ;
 
-loop:
-    LOOP
-    DO
-    loop_structure
+if_structure:
+    IF
+    condition
+    function_scope
+    (ELSEIF
+     condition
+     function_scope
+    )*
+    (ELSE
+    function_scope
+    )?
     END
     ;
 
-for:
+
+if_structure_loop:
+    IF
+    condition
+    loop_scope
+    (ELSEIF
+     condition
+     loop_scope
+    )*
+    (ELSE
+    loop_scope
+    )?
+    END
+    ;
+
+condition:
+        LPAR condition RPAR
+        | LPAR condition (AND | OR) condition RPAR
+        | LPAR expr RPAR
+        ;
+
+loop:
+    LOOP
+    DO
+    loop_scope
+    END
+    ;
+
+for_loop:
     FOR
     IDENTIFIER
     IN
     list | IDENTIFIER | range
-    loop_structure
+    loop_scope
     END
     ;
+
+list_element:
+    IDENTIFIER
+    (LBRACKET
+     expr
+     RBRACKET
+    )+
+    ;
+
+assignment
+    : (IDENTIFIER | list | list_element)
+    (
+        ASSIGN
+        | ADD_ASSIGN
+        | SUB_ASSIGN
+        | MOD_ASSIGN
+        | DIV_ASSIGN
+        | MUL_ASSIGN
+    )
+    expr
+    ;
+
+loop_scope:
+      (statement
+       | comment
+       | break_if_statement
+       | next_if_statement
+       )*
+      (return_statement | break_statement | next_statement)?
+    ;
+
+break_statement: BREAK SEMICOLON;
+next_statement: NEXT SEMICOLON;
+next_if_statement: NEXT IF condition SEMICOLON;
+break_if_statement: BREAK IF condition SEMICOLON;
+
+
 
 function_ptr:
     METHOD
@@ -105,9 +199,127 @@ function_ptr:
     COLON
     IDENTIFIER
     RPAR
+    ;
 
+expr
+    : expr_append
+    ;
 
-def f()
+expr_append
+    :
+    expr_or expr_append_
+    ;
+
+expr_append_:
+    APPEND expr_or expr_append_
+    |
+    ;
+
+expr_or:
+    expr_and expr_or_
+    ;
+
+expr_or_:
+    OR expr_and expr_or_
+    |
+    ;
+
+expr_and:
+    expr_eq expr_and_
+    ;
+
+expr_and_:
+    AND expr_eq expr_and_
+    |
+    ;
+
+expr_eq
+    : expr_cmp expr_eq_
+    ;
+
+expr_eq_
+    : EQL expr_cmp expr_eq_
+    | NEQ expr_cmp expr_eq_
+    |
+    ;
+
+expr_cmp
+    : expr_add_sub expr_cmp_
+    ;
+
+expr_cmp_
+    : GTR expr_add_sub expr_cmp_
+    | LES expr_add_sub expr_cmp_
+    | GEQ expr_add_sub expr_cmp_
+    | LEQ expr_add_sub expr_cmp_
+    |
+    ;
+
+expr_add_sub
+    : expr_mul_div expr_add_sub_
+    ;
+
+expr_add_sub_
+    : PLUS expr_mul_div expr_add_sub_
+    | MINUS expr_mul_div expr_add_sub_
+    |
+    ;
+
+expr_mul_div
+    : expr_unary expr_mul_div_
+    ;
+
+expr_mul_div_
+    : MULT expr_unary expr_mul_div_
+    | DIV expr_unary expr_mul_div_
+    | MOD expr_unary expr_mul_div_
+    |
+    ;
+
+expr_unary
+    : NOT expr_other
+    | MINUS expr_other
+    | expr_other
+    ;
+
+expr_other
+    : LPAR expr RPAR
+    | list
+    | (IDENTIFIER | list_element) (INC | DEC)
+    | function_call
+    | primitive_function_call
+    | primitive_value
+    | function_ptr
+    ;
+
+function_call
+    :
+    IDENTIFIER
+    LPAR
+    (
+    expr
+        (
+        COMMA
+        expr
+        )*
+    )?
+    RPAR
+    ;
+
+primitive_function_call:
+    primitive_function
+    LPAR
+    (
+    expr
+        (
+        COMMA
+        expr
+        )*
+    )?
+    RPAR
+    ;
+
+primitive_function: PUTS | PUSH | LEN | CHOP | CHOMP;
 
 //statement
 //    : (print
@@ -131,7 +343,7 @@ def f()
 // Keywords
 END:       'end';
 DEF:       'def';
-IF:         'if';
+IF:        'if';
 ELSE:       'else';
 ELSEIF:     'elseif';
 TRUE:       'true';
@@ -164,8 +376,7 @@ FUNCPTR:   'fptr';
 
 // Type Values
 
-ZERO:        '0';
-INT_VAL:     [1-9][0-9]*;
+INT_VAL:     [1-9][0-9]* | [0];
 FLOAT_VAL:   INT_VAL '.' [0-9]+ | '0.' [0-9]*;
 STRING_VAL:  '"' ('\\' ["\\] | ~["\\\r\n])* '"';
 BOOLEAN_VAL: 'true' | 'false';
@@ -175,7 +386,7 @@ BOOLEAN_VAL: 'true' | 'false';
 LPAR: '(';
 RPAR: ')';
 
-// Brackets (array element access)
+// Brackets
 
 LBRACKET: '[';
 RBRACKET: ']';
@@ -186,9 +397,10 @@ PLUS:  '+';
 MINUS: '-';
 MULT:  '*';
 DIV:   '/';
+MOD:   '%';
 NEG:   '-';
-INC:    '++';
-DEC:    '--';
+INC:   '++';
+DEC:   '--';
 
 // Relational Operators
 
@@ -234,6 +446,7 @@ QUESTION:  '?';
 IDENTIFIER: [a-zA-Z_][a-zA-Z0-9_]*;
 //PREDICATE:  [A-Z][a-zA-Z0-9_]*;
 ARROW:      '->';
-SINGLELINECOMMENT:    '#' ~[\r\n]* -> skip;
-MULTILINECOMMENT:     '=begin' .*? '=end' -> skip;
+PATTERN_TOKEN: [\n]([\t] | ['    ']) '|';
+SINGLE_LINE_COMMENT:    '#' ~[\r\n]* -> skip;
+MULTI_LINE_COMMENT:     '=begin' .*? '=end' -> skip;
 WS:         [ \t\r\n]+ -> skip;

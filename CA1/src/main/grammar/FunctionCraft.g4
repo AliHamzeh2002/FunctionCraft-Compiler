@@ -118,9 +118,7 @@ loop
 	;
 
 for_loop
-	: FOR IDENTIFIER IN list
-	| IDENTIFIER
-	| range loop_scope END
+	: FOR IDENTIFIER IN (list | IDENTIFIER | range) loop_scope END
 	;
 
 list_element

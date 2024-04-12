@@ -14,8 +14,9 @@ main
 	;
 
 pattern
-	: PATTERN IDENTIFIER LPAR (IDENTIFIER ( COMMA IDENTIFIER)*)? RPAR (PATTERN_TOKEN condition ASSIGN
-		expr)* SEMICOLON
+	: PATTERN IDENTIFIER LPAR (IDENTIFIER ( COMMA IDENTIFIER)*)? RPAR (
+		PATTERN_TOKEN condition ASSIGN expr
+	)* SEMICOLON
 	;
 
 function_scope
@@ -84,10 +85,32 @@ if_structure_loop
 	)? END
 	;
 
-condition
-	: LPAR condition RPAR
-	| LPAR condition (AND | OR) condition RPAR
-	| LPAR expr RPAR
+condition:
+	condition_or
+	;
+
+condition_or
+	: LPAR condition_and RPAR condition_or_
+	| condition_and
+	;
+
+condition_or_
+	: OR LPAR condition_and RPAR condition_or_
+	|
+	;
+
+condition_and
+	: LPAR condition_other RPAR condition_and_
+	| condition_other
+	;
+
+condition_and_
+	: AND LPAR condition_other RPAR condition_and_
+	|
+	;
+
+condition_other:
+	LPAR expr RPAR
 	;
 
 loop
@@ -159,21 +182,22 @@ expr_append_
 	;
 
 expr_or
-	: expr_and expr_or_
+	: LPAR expr_and RPAR expr_or_
+	| expr_and
 	;
 
 expr_or_
-	: OR expr_and expr_or_
+	: OR LPAR expr_and RPAR expr_or_
 	|
 	;
 
 expr_and
-	: expr_eq expr_and_
+	: LPAR expr_eq RPAR expr_and_
+	| expr_eq
 	;
 
 expr_and_
 	: AND expr_eq expr_and_
-	|
 	;
 
 expr_eq
@@ -252,24 +276,24 @@ matching
 	: IDENTIFIER DOT MATCH LPAR (expr ( COMMA expr)*)? RPAR
 	;
 
-puts:
-	PUTS LPAR expr RPAR
+puts
+	: PUTS LPAR expr RPAR
 	;
 
-push:
-	PUSH LPAR expr COMMA expr RPAR
+push
+	: PUSH LPAR expr COMMA expr RPAR
 	;
 
-len:
-	LEN LPAR expr RPAR
+len
+	: LEN LPAR expr RPAR
 	;
 
-chop:
-	CHOP LPAR expr RPAR
+chop
+	: CHOP LPAR expr RPAR
 	;
 
-chomp:
-	CHOMP LPAR expr RPAR
+chomp
+	: CHOMP LPAR expr RPAR
 	;
 
 // Keywords
@@ -367,29 +391,17 @@ IN
 
 // Types
 
-// INT
-// 	: 'int'
-// 	;
+// INT : 'int' ;
 
-// FLOAT
-// 	: 'float'
-// 	;
+// FLOAT : 'float' ;
 
-// STRING
-// 	: 'string'
-// 	;
+// STRING : 'string' ;
 
-// BOOLEAN
-// 	: 'bool'
-// 	;
+// BOOLEAN : 'bool' ;
 
-// LIST
-// 	: 'list'
-// 	;
+// LIST : 'list' ;
 
-// FUNCPTR
-// 	: 'fptr'
-// 	;
+// FUNCPTR : 'fptr' ;
 
 // Type Values
 
@@ -406,7 +418,6 @@ FLOAT_VAL
 STRING_VAL
 	: '"' ('\\' ["\\] | ~["\\\r\n])* '"'
 	;
-
 
 // Parenthesis
 
@@ -434,7 +445,9 @@ PLUS
 	: '+'
 	;
 
-MINUS : '-' ;
+MINUS
+	: '-'
+	;
 
 MULT
 	: '*'
@@ -448,9 +461,7 @@ MOD
 	: '%'
 	;
 
-// NEG
-// 	: '-'
-// 	;
+// NEG : '-' ;
 
 INC
 	: '++'
@@ -577,7 +588,7 @@ ARROW
 
 PATTERN_TOKEN
 	: [\r][\n] ([\t] | '    ') '|'
-	  | [\n] ([\t] | '    ') '|'
+	| [\n] ([\t] | '    ') '|'
 	;
 
 SINGLE_LINE_COMMENT

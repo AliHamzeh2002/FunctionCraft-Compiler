@@ -107,6 +107,36 @@ public interface FunctionCraftVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitCondition(FunctionCraftParser.ConditionContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link FunctionCraftParser#condition_or}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCondition_or(FunctionCraftParser.Condition_orContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link FunctionCraftParser#condition_or_}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCondition_or_(FunctionCraftParser.Condition_or_Context ctx);
+	/**
+	 * Visit a parse tree produced by {@link FunctionCraftParser#condition_and}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCondition_and(FunctionCraftParser.Condition_andContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link FunctionCraftParser#condition_and_}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCondition_and_(FunctionCraftParser.Condition_and_Context ctx);
+	/**
+	 * Visit a parse tree produced by {@link FunctionCraftParser#condition_other}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCondition_other(FunctionCraftParser.Condition_otherContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link FunctionCraftParser#loop}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

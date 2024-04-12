@@ -1,5 +1,4 @@
-// Generated from C:/Users/ALI/OneDrive/Desktop/university/Project/Compiler/FunctionCraft-Compiler/CA1/src/main/grammar/FunctionCraft.g4 by ANTLR 4.13.1
-package main.grammar;
+// Generated from c:/Users/ALI/OneDrive/Desktop/university/Project/Compiler/FunctionCraft-Compiler/CA1/src/main/grammar/FunctionCraft.g4 by ANTLR 4.13.1
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
 /**
@@ -167,56 +166,6 @@ public interface FunctionCraftListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitCondition(FunctionCraftParser.ConditionContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link FunctionCraftParser#condition_or}.
-	 * @param ctx the parse tree
-	 */
-	void enterCondition_or(FunctionCraftParser.Condition_orContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link FunctionCraftParser#condition_or}.
-	 * @param ctx the parse tree
-	 */
-	void exitCondition_or(FunctionCraftParser.Condition_orContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link FunctionCraftParser#condition_or_}.
-	 * @param ctx the parse tree
-	 */
-	void enterCondition_or_(FunctionCraftParser.Condition_or_Context ctx);
-	/**
-	 * Exit a parse tree produced by {@link FunctionCraftParser#condition_or_}.
-	 * @param ctx the parse tree
-	 */
-	void exitCondition_or_(FunctionCraftParser.Condition_or_Context ctx);
-	/**
-	 * Enter a parse tree produced by {@link FunctionCraftParser#condition_and}.
-	 * @param ctx the parse tree
-	 */
-	void enterCondition_and(FunctionCraftParser.Condition_andContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link FunctionCraftParser#condition_and}.
-	 * @param ctx the parse tree
-	 */
-	void exitCondition_and(FunctionCraftParser.Condition_andContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link FunctionCraftParser#condition_and_}.
-	 * @param ctx the parse tree
-	 */
-	void enterCondition_and_(FunctionCraftParser.Condition_and_Context ctx);
-	/**
-	 * Exit a parse tree produced by {@link FunctionCraftParser#condition_and_}.
-	 * @param ctx the parse tree
-	 */
-	void exitCondition_and_(FunctionCraftParser.Condition_and_Context ctx);
-	/**
-	 * Enter a parse tree produced by {@link FunctionCraftParser#condition_other}.
-	 * @param ctx the parse tree
-	 */
-	void enterCondition_other(FunctionCraftParser.Condition_otherContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link FunctionCraftParser#condition_other}.
-	 * @param ctx the parse tree
-	 */
-	void exitCondition_other(FunctionCraftParser.Condition_otherContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link FunctionCraftParser#loop}.
 	 * @param ctx the parse tree

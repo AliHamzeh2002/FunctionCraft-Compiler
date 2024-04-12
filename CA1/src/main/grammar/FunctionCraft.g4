@@ -86,9 +86,31 @@ if_structure_loop
 	;
 
 condition
-	: LPAR condition RPAR
-	| LPAR condition (AND | OR) condition RPAR
-	| LPAR expr RPAR
+	: condition_or
+	;
+
+condition_or
+	: LPAR condition_and RPAR condition_or_
+	| condition_and
+	;
+
+condition_or_
+	: OR LPAR condition_and RPAR condition_or_
+	|
+	;
+
+condition_and
+	: LPAR condition_other RPAR condition_and_
+	| condition_other
+	;
+
+condition_and_
+	: AND LPAR condition_other RPAR condition_and_
+	|
+	;
+
+condition_other
+	: LPAR expr RPAR
 	;
 
 loop
@@ -160,21 +182,22 @@ expr_append_
 	;
 
 expr_or
-	: expr_and expr_or_
+	: LPAR expr_and RPAR expr_or_
+	| expr_and
 	;
 
 expr_or_
-	: OR expr_and expr_or_
+	: OR LPAR expr_and RPAR expr_or_
 	|
 	;
 
 expr_and
-	: expr_eq expr_and_
+	: LPAR expr_eq RPAR expr_and_
+	| expr_eq
 	;
 
 expr_and_
 	: AND expr_eq expr_and_
-	|
 	;
 
 expr_eq

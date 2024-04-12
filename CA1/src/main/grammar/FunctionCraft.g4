@@ -14,16 +14,23 @@ main
 	;
 
 pattern
-	: PATTERN IDENTIFIER LPAR (IDENTIFIER ( COMMA IDENTIFIER)*)? RPAR PATTERN_TOKEN condition ASSIGN
-		expr
+	: PATTERN IDENTIFIER LPAR (IDENTIFIER ( COMMA IDENTIFIER)*)? RPAR (
+		PATTERN_TOKEN condition ASSIGN expr
+	)* SEMICOLON
 	;
 
 function_scope
-	: (statement | comment)* (return_statement)?
+	: (statement | if_structure | comment)* (return_statement)?
 	;
 
 return_statement
 	: RETURN (expr)? SEMICOLON
+	;
+
+statement
+	: (expr | assignment) SEMICOLON
+	| for_loop
+	| loop
 	;
 
 function
@@ -40,7 +47,7 @@ function_args
 			)?
 			| (IDENTIFIER)
 		)
-	)?
+	)
 	;
 
 lambda_function
@@ -51,12 +58,13 @@ primitive_value
 	: INT_VAL
 	| FLOAT_VAL
 	| STRING_VAL
-	| BOOLEAN_VAL
+	| TRUE
+	| FALSE
 	| lambda_function
 	;
 
 list
-	: LBRACKET (expr COMMA)* expr RBRACKET
+	: LBRACKET ((expr COMMA)* expr)? RBRACKET
 	;
 
 range
@@ -112,6 +120,7 @@ loop_scope
 	: (
 		statement
 		| comment
+		| if_structure_loop
 		| break_if_statement
 		| next_if_statement
 	)* (return_statement | break_statement | next_statement)?
@@ -220,10 +229,11 @@ expr_unary
 expr_other
 	: LPAR expr RPAR
 	| list
-	| (IDENTIFIER | list_element) (INC | DEC)
+	| (IDENTIFIER | list_element) (INC | DEC)?
 	| function_call
 	| primitive_function_call
 	| primitive_value
+	| matching
 	| function_ptr
 	;
 
@@ -232,20 +242,36 @@ function_call
 	;
 
 primitive_function_call
-	: primitive_function LPAR (expr ( COMMA expr)*)? RPAR
+	: puts
+	| push
+	| len
+	| chop
+	| chomp
 	;
 
-primitive_function
-	: PUTS
-	| PUSH
-	| LEN
-	| CHOP
-	| CHOMP
+matching
+	: IDENTIFIER DOT MATCH LPAR (expr ( COMMA expr)*)? RPAR
 	;
 
-//statement
-// : (print | returnf | declaration | assignment | initialization | initialization_array |
-// function_call | predicate_def) SEMICOLON | forloop | implication ;
+puts
+	: PUTS LPAR expr RPAR
+	;
+
+push
+	: PUSH LPAR expr COMMA expr RPAR
+	;
+
+len
+	: LEN LPAR expr RPAR
+	;
+
+chop
+	: CHOP LPAR expr RPAR
+	;
+
+chomp
+	: CHOMP LPAR expr RPAR
+	;
 
 // Keywords
 END
@@ -309,7 +335,7 @@ LEN
 	;
 
 PATTERN
-	: 'patern'
+	: 'pattern'
 	;
 
 MATCH
@@ -342,29 +368,17 @@ IN
 
 // Types
 
-INT
-	: 'int'
-	;
+// INT : 'int' ;
 
-FLOAT
-	: 'float'
-	;
+// FLOAT : 'float' ;
 
-STRING
-	: 'string'
-	;
+// STRING : 'string' ;
 
-BOOLEAN
-	: 'bool'
-	;
+// BOOLEAN : 'bool' ;
 
-LIST
-	: 'list'
-	;
+// LIST : 'list' ;
 
-FUNCPTR
-	: 'fptr'
-	;
+// FUNCPTR : 'fptr' ;
 
 // Type Values
 
@@ -380,11 +394,6 @@ FLOAT_VAL
 
 STRING_VAL
 	: '"' ('\\' ["\\] | ~["\\\r\n])* '"'
-	;
-
-BOOLEAN_VAL
-	: 'true'
-	| 'false'
 	;
 
 // Parenthesis
@@ -429,9 +438,7 @@ MOD
 	: '%'
 	;
 
-NEG
-	: '-'
-	;
+// NEG : '-' ;
 
 INC
 	: '++'
@@ -557,8 +564,9 @@ ARROW
 	;
 
 PATTERN_TOKEN
-    : [\n] ( [\t] | '    ' ) '|'
-    ;
+	: [\r][\n] ([\t] | '    ') '|'
+	| [\n] ([\t] | '    ') '|'
+	;
 
 SINGLE_LINE_COMMENT
 	: '#' ~[\r\n]* -> skip

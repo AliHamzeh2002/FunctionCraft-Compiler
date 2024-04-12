@@ -12,7 +12,7 @@ def f2 (a, [b = 10, c = 20])
 end
 
 def create2dList(l, i, j)
-    if(i is not 10)
+    if(i != 10)
         create2dList(l[i] << i << j * 2, i + 1, j + 1);
     else
         printList(l, i);

@@ -10,13 +10,13 @@ comment
 	;
 
 main
-	: DEF MAIN { System.out.println("MAIN"); }  LPAR RPAR function_scope END
+	: DEF MAIN { System.out.println("MAIN"); } LPAR RPAR function_scope END
 	;
 
 pattern
-	: PATTERN id=IDENTIFIER { System.out.println("PatternDec: " + $id.text); } LPAR (IDENTIFIER ( COMMA IDENTIFIER)*)? RPAR (
-		PATTERN_TOKEN condition ASSIGN expr
-	)* SEMICOLON
+	: PATTERN id = IDENTIFIER { System.out.println("PatternDec: " + $id.text); } LPAR (
+		IDENTIFIER ( COMMA IDENTIFIER)*
+	)? RPAR (PATTERN_TOKEN condition ASSIGN expr)* SEMICOLON
 	;
 
 function_scope
@@ -34,7 +34,8 @@ statement
 	;
 
 function
-	: DEF id=IDENTIFIER { System.out.println("FuncDec: " + $id.text); } LPAR function_args RPAR function_scope END
+	: DEF id = IDENTIFIER { System.out.println("FuncDec: " + $id.text); } LPAR function_args RPAR
+		function_scope END
 	;
 
 function_args
@@ -51,7 +52,8 @@ function_args
 	;
 
 lambda_function
-	: ARROW { System.out.println("Structure: LAMBDA"); } LPAR function_args RPAR LBRACE function_scope RBRACE
+	: ARROW { System.out.println("Structure: LAMBDA"); } LPAR function_args RPAR LBRACE
+		function_scope RBRACE
 	;
 
 primitive_value
@@ -74,15 +76,15 @@ range
 	;
 
 if_structure
-	: IF { System.out.println("Decision: IF"); }condition function_scope (
-		ELSEIF { System.out.println("Decision: ELSEIF"); } condition function_scope
-	)* (ELSE { System.out.println("Decision: ELSE"); } function_scope)? END
+	: IF		{ System.out.println("Decision: IF"); } condition function_scope (
+		ELSEIF	{ System.out.println("Decision: ELSEIF"); } condition function_scope
+	)* (ELSE	{ System.out.println("Decision: ELSE"); } function_scope)? END
 	;
 
 if_structure_loop
-	: IF { System.out.println("Decision: IF"); }condition loop_scope (ELSEIF { System.out.println("Decision: ELSEIF"); }condition loop_scope)* (
-		ELSE { System.out.println("Decision: ELSE"); } loop_scope
-	)? END
+	: IF		{ System.out.println("Decision: IF"); } condition loop_scope (
+		ELSEIF	{ System.out.println("Decision: ELSEIF"); } condition loop_scope
+	)* (ELSE	{ System.out.println("Decision: ELSE"); } loop_scope)? END
 	;
 
 condition
@@ -118,7 +120,11 @@ loop
 	;
 
 for_loop
-	: FOR { System.out.println("Loop: FOR"); }  IDENTIFIER IN (list | IDENTIFIER | range) loop_scope END
+	: FOR { System.out.println("Loop: FOR"); } IDENTIFIER IN (
+		list
+		| IDENTIFIER
+		| range
+	) loop_scope END
 	;
 
 list_element
@@ -126,7 +132,9 @@ list_element
 	;
 
 assignment
-	: id=IDENTIFIER { System.out.println("Assignment: " + $id.text); }  (LBRACKET expr RBRACKET)* (
+	: id = IDENTIFIER { System.out.println("Assignment: " + $id.text); } (
+		LBRACKET expr RBRACKET
+	)* (
 		ASSIGN
 		| ADD_ASSIGN
 		| SUB_ASSIGN
@@ -147,7 +155,7 @@ loop_scope
 	;
 
 break_statement
-	: BREAK { System.out.println("Control: BREAK"); }  SEMICOLON
+	: BREAK { System.out.println("Control: BREAK"); } SEMICOLON
 	;
 
 next_statement
@@ -155,7 +163,7 @@ next_statement
 	;
 
 next_if_statement
-	: NEXT { System.out.println("Control: NEXT"); }IF condition SEMICOLON
+	: NEXT { System.out.println("Control: NEXT"); } IF condition SEMICOLON
 	;
 
 break_if_statement
@@ -204,8 +212,8 @@ expr_eq
 	;
 
 expr_eq_
-	: EQL expr_cmp expr_eq_ {System.out.println("Operator: ==");}
-	| NEQ expr_cmp expr_eq_ {System.out.println("Operator: !=");}
+	: EQL expr_cmp expr_eq_	{System.out.println("Operator: ==");}
+	| NEQ expr_cmp expr_eq_	{System.out.println("Operator: !=");}
 	|
 	;
 
@@ -214,10 +222,10 @@ expr_cmp
 	;
 
 expr_cmp_
-	: GTR expr_add_sub expr_cmp_ {System.out.println("Operator: >");}
-	| LES expr_add_sub expr_cmp_ {System.out.println("Operator: <");}
-	| GEQ expr_add_sub expr_cmp_ {System.out.println("Operator: >=");}
-	| LEQ expr_add_sub expr_cmp_ {System.out.println("Operator: <=");}
+	: GTR expr_add_sub expr_cmp_	{System.out.println("Operator: >");}
+	| LES expr_add_sub expr_cmp_	{System.out.println("Operator: <");}
+	| GEQ expr_add_sub expr_cmp_	{System.out.println("Operator: >=");}
+	| LEQ expr_add_sub expr_cmp_	{System.out.println("Operator: <=");}
 	|
 	;
 
@@ -226,8 +234,8 @@ expr_add_sub
 	;
 
 expr_add_sub_
-	: PLUS expr_mul_div   {System.out.println("Operator: +");}
-	| MINUS expr_mul_div expr_add_sub_ {System.out.println("Operator: -");}
+	: PLUS expr_mul_div expr_add_sub_	{System.out.println("Operator: +");}
+	| MINUS expr_mul_div expr_add_sub_	{System.out.println("Operator: -");}
 	|
 	;
 
@@ -236,15 +244,15 @@ expr_mul_div
 	;
 
 expr_mul_div_
-	: MULT expr_unary expr_mul_div_ {System.out.println("Operator: *");}
-	| DIV expr_unary expr_mul_div_ {System.out.println("Operator: /");}
-	| MOD expr_unary expr_mul_div_ {System.out.println("Operator: %");}
+	: MULT expr_unary expr_mul_div_	{System.out.println("Operator: *");}
+	| DIV expr_unary expr_mul_div_	{System.out.println("Operator: /");}
+	| MOD expr_unary expr_mul_div_	{System.out.println("Operator: %");}
 	|
 	;
 
 expr_unary
-	: NOT expr_other    {System.out.println("Operator: !");}
-	| MINUS expr_other {System.out.println("Operator: -");}
+	: NOT expr_other	{System.out.println("Operator: !");}
+	| MINUS expr_other	{System.out.println("Operator: -");}
 	| expr_other
 	;
 
@@ -260,7 +268,9 @@ expr_other
 	;
 
 function_call
-	: IDENTIFIER { System.out.println("Function Call"); }  LPAR (expr ( COMMA expr)*)? RPAR
+	: IDENTIFIER { System.out.println("Function Call"); } LPAR (
+		expr ( COMMA expr)*
+	)? RPAR
 	;
 
 primitive_function_call
@@ -272,11 +282,13 @@ primitive_function_call
 	;
 
 matching
-	: IDENTIFIER DOT MATCH { System.out.println("Built-In: MATCH"); }LPAR (expr ( COMMA expr)*)? RPAR
+	: IDENTIFIER DOT MATCH { System.out.println("Built-In: MATCH"); } LPAR (
+		expr ( COMMA expr)*
+	)? RPAR
 	;
 
 puts
-	: PUTS { System.out.println("Built-In: PUTS"); }LPAR expr RPAR
+	: PUTS { System.out.println("Built-In: PUTS"); } LPAR expr RPAR
 	;
 
 push

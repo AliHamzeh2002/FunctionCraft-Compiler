@@ -10,11 +10,11 @@ comment
 	;
 
 main
-	: DEF MAIN LPAR RPAR function_scope END
+	: DEF MAIN { System.out.println("MAIN"); }  LPAR RPAR function_scope END
 	;
 
 pattern
-	: PATTERN IDENTIFIER LPAR (IDENTIFIER ( COMMA IDENTIFIER)*)? RPAR (
+	: PATTERN id=IDENTIFIER { System.out.println("PatternDec: " + $id.text); } LPAR (IDENTIFIER ( COMMA IDENTIFIER)*)? RPAR (
 		PATTERN_TOKEN condition ASSIGN expr
 	)* SEMICOLON
 	;
@@ -24,7 +24,7 @@ function_scope
 	;
 
 return_statement
-	: RETURN (expr)? SEMICOLON
+	: RETURN { System.out.println("RETURN"); } (expr)? SEMICOLON
 	;
 
 statement
@@ -34,7 +34,7 @@ statement
 	;
 
 function
-	: DEF IDENTIFIER LPAR function_args RPAR function_scope END
+	: DEF id=IDENTIFIER { System.out.println("FuncDec: " + $id.text); } LPAR function_args RPAR function_scope END
 	;
 
 function_args
@@ -51,7 +51,7 @@ function_args
 	;
 
 lambda_function
-	: ARROW LPAR function_args RPAR LBRACE function_scope RBRACE
+	: ARROW { System.out.println("Structure: LAMBDA"); } LPAR function_args RPAR LBRACE function_scope RBRACE
 	;
 
 primitive_value
@@ -74,14 +74,14 @@ range
 	;
 
 if_structure
-	: IF condition function_scope (
-		ELSEIF condition function_scope
-	)* (ELSE function_scope)? END
+	: IF { System.out.println("Decision: IF"); }condition function_scope (
+		ELSEIF { System.out.println("Decision: ELSEIF"); } condition function_scope
+	)* (ELSE { System.out.println("Decision: ELSE"); } function_scope)? END
 	;
 
 if_structure_loop
-	: IF condition loop_scope (ELSEIF condition loop_scope)* (
-		ELSE loop_scope
+	: IF { System.out.println("Decision: IF"); }condition loop_scope (ELSEIF { System.out.println("Decision: ELSEIF"); }condition loop_scope)* (
+		ELSE { System.out.println("Decision: ELSE"); } loop_scope
 	)? END
 	;
 
@@ -114,11 +114,11 @@ condition_other
 	;
 
 loop
-	: LOOP DO loop_scope END
+	: LOOP DO { System.out.println("Loop: DO"); } loop_scope END
 	;
 
 for_loop
-	: FOR IDENTIFIER IN (list | IDENTIFIER | range) loop_scope END
+	: FOR { System.out.println("Loop: FOR"); }  IDENTIFIER IN (list | IDENTIFIER | range) loop_scope END
 	;
 
 list_element
@@ -126,7 +126,7 @@ list_element
 	;
 
 assignment
-	: (IDENTIFIER | list | list_element) (
+	: id=IDENTIFIER { System.out.println("Assignment: " + $id.text); }  (LBRACKET expr RBRACKET)* (
 		ASSIGN
 		| ADD_ASSIGN
 		| SUB_ASSIGN
@@ -147,19 +147,19 @@ loop_scope
 	;
 
 break_statement
-	: BREAK SEMICOLON
+	: BREAK { System.out.println("Control: BREAK"); }  SEMICOLON
 	;
 
 next_statement
-	: NEXT SEMICOLON
+	: NEXT { System.out.println("Control: NEXT"); } SEMICOLON
 	;
 
 next_if_statement
-	: NEXT IF condition SEMICOLON
+	: NEXT { System.out.println("Control: NEXT"); }IF condition SEMICOLON
 	;
 
 break_if_statement
-	: BREAK IF condition SEMICOLON
+	: BREAK { System.out.println("Control: BREAK"); } IF condition SEMICOLON
 	;
 
 function_ptr
@@ -260,7 +260,7 @@ expr_other
 	;
 
 function_call
-	: IDENTIFIER LPAR (expr ( COMMA expr)*)? RPAR
+	: IDENTIFIER { System.out.println("Function Call"); }  LPAR (expr ( COMMA expr)*)? RPAR
 	;
 
 primitive_function_call
@@ -272,27 +272,27 @@ primitive_function_call
 	;
 
 matching
-	: IDENTIFIER DOT MATCH LPAR (expr ( COMMA expr)*)? RPAR
+	: IDENTIFIER DOT MATCH { System.out.println("Built-In: MATCH"); }LPAR (expr ( COMMA expr)*)? RPAR
 	;
 
 puts
-	: PUTS LPAR expr RPAR
+	: PUTS { System.out.println("Built-In: PUTS"); }LPAR expr RPAR
 	;
 
 push
-	: PUSH LPAR expr COMMA expr RPAR
+	: PUSH { System.out.println("Built-In: PUSH"); } LPAR expr COMMA expr RPAR
 	;
 
 len
-	: LEN LPAR expr RPAR
+	: LEN { System.out.println("Built-In: LEN"); } LPAR expr RPAR
 	;
 
 chop
-	: CHOP LPAR expr RPAR
+	: CHOP { System.out.println("Built-In: CHOP"); } LPAR expr RPAR
 	;
 
 chomp
-	: CHOMP LPAR expr RPAR
+	: CHOMP { System.out.println("Built-In: CHOMP"); } LPAR expr RPAR
 	;
 
 // Keywords

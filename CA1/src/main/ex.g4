@@ -1,4 +1,4 @@
-grammar FunctionCraft;
+grammar ex;
 
 function_craft
 	: (function | comment | pattern)* main comment*
@@ -90,22 +90,22 @@ condition
 	;
 
 condition_or
-	: LPAR condition_and RPAR condition_or_
+	: LPAR expr RPAR condition_or_
 	| condition_and
 	;
 
 condition_or_
-	: OR LPAR condition_and RPAR condition_or_
+	: OR LPAR expr RPAR condition_or_
 	|
 	;
 
 condition_and
-	: LPAR condition_other RPAR condition_and_
+	: LPAR expr RPAR condition_and_
 	| condition_other
 	;
 
 condition_and_
-	: AND LPAR condition_other RPAR condition_and_
+	: AND LPAR expr RPAR condition_and_
 	|
 	;
 
@@ -180,22 +180,23 @@ expr_append_
 	;
 
 expr_or
-	: LPAR expr_and RPAR expr_or_
+	: LPAR expr RPAR expr_or_
 	| expr_and
 	;
 
 expr_or_
-	: OR LPAR expr_and RPAR expr_or_
+	: OR LPAR expr RPAR expr_or_
 	|
 	;
 
 expr_and
-	: LPAR expr_eq RPAR expr_and_
+	: LPAR expr RPAR expr_and_
 	| expr_eq
 	;
 
 expr_and_
-	: AND expr_eq expr_and_
+	: AND LPAR expr RPAR expr_and_
+	|
 	;
 
 expr_eq

@@ -85,8 +85,8 @@ if_structure_loop
 	)? END
 	;
 
-condition:
-	condition_or
+condition
+	: condition_or
 	;
 
 condition_or
@@ -109,8 +109,8 @@ condition_and_
 	|
 	;
 
-condition_other:
-	LPAR expr RPAR
+condition_other
+	: LPAR expr RPAR
 	;
 
 loop
@@ -118,9 +118,7 @@ loop
 	;
 
 for_loop
-	: FOR IDENTIFIER IN list
-	| IDENTIFIER
-	| range loop_scope END
+	: FOR IDENTIFIER IN (list | IDENTIFIER | range) loop_scope END
 	;
 
 list_element

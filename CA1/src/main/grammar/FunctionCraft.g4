@@ -251,8 +251,8 @@ expr_mul_div_
 	;
 
 expr_unary
-	: NOT expr_other	{System.out.println("Operator: !");}
-	| MINUS expr_other	{System.out.println("Operator: -");}
+	: NOT LPAR expr RPAR	{System.out.println("Operator: !");}
+	| MINUS expr_other		{System.out.println("Operator: -");}
 	| expr_other
 	;
 
@@ -268,7 +268,7 @@ expr_other
 	;
 
 function_call
-	: IDENTIFIER { System.out.println("Function Call"); } LPAR (
+	: (IDENTIFIER | lambda_function) { System.out.println("Function Call"); } LPAR (
 		expr ( COMMA expr)*
 	)? RPAR
 	;

@@ -22,8 +22,8 @@ Built-In: PUTS
 Control: BREAK
 Control: NEXT
 Built-In: PUTS
-Assignment: fib_5
 Built-In: MATCH
+Assignment: fib_5
 FunctionCall
 Structure: LAMBDA
 RETURN

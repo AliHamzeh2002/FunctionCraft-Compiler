@@ -128,7 +128,7 @@ for_loop
 	;
 
 list_element
-	: IDENTIFIER (LBRACKET expr RBRACKET)+
+	: (IDENTIFIER | function_call) (LBRACKET expr RBRACKET)+
 	;
 
 assignment
@@ -183,7 +183,7 @@ expr_append
 	;
 
 expr_append_
-	: APPEND expr_or expr_append_ {System.out.println("Operator: <<");}
+	: APPEND expr_or {System.out.println("Operator: <<");} expr_append_
 	|
 	;
 
@@ -193,7 +193,7 @@ expr_or
 	;
 
 expr_or_
-	: OR LPAR expr RPAR expr_or_ {System.out.println("Operator: ||");}
+	: OR LPAR expr RPAR {System.out.println("Operator: ||");} expr_or_
 	|
 	;
 
@@ -203,7 +203,7 @@ expr_and
 	;
 
 expr_and_
-	: AND LPAR expr RPAR expr_and_ {System.out.println("Operator: &&");}
+	: AND LPAR expr RPAR {System.out.println("Operator: &&");} expr_and_
 	|
 	;
 
@@ -212,8 +212,8 @@ expr_eq
 	;
 
 expr_eq_
-	: EQL expr_cmp expr_eq_	{System.out.println("Operator: ==");}
-	| NEQ expr_cmp expr_eq_	{System.out.println("Operator: !=");}
+	: EQL expr_cmp	{System.out.println("Operator: ==");} expr_eq_
+	| NEQ expr_cmp	{System.out.println("Operator: !=");} expr_eq_
 	|
 	;
 
@@ -222,10 +222,10 @@ expr_cmp
 	;
 
 expr_cmp_
-	: GTR expr_add_sub expr_cmp_	{System.out.println("Operator: >");}
-	| LES expr_add_sub expr_cmp_	{System.out.println("Operator: <");}
-	| GEQ expr_add_sub expr_cmp_	{System.out.println("Operator: >=");}
-	| LEQ expr_add_sub expr_cmp_	{System.out.println("Operator: <=");}
+	: GTR expr_add_sub	{System.out.println("Operator: >");} expr_cmp_
+	| LES expr_add_sub	{System.out.println("Operator: <");} expr_cmp_
+	| GEQ expr_add_sub	{System.out.println("Operator: >=");} expr_cmp_
+	| LEQ expr_add_sub	{System.out.println("Operator: <=");} expr_cmp_
 	|
 	;
 
@@ -234,8 +234,8 @@ expr_add_sub
 	;
 
 expr_add_sub_
-	: PLUS expr_mul_div expr_add_sub_	{System.out.println("Operator: +");}
-	| MINUS expr_mul_div expr_add_sub_	{System.out.println("Operator: -");}
+	: PLUS expr_mul_div		{System.out.println("Operator: +");} expr_add_sub_
+	| MINUS expr_mul_div	{System.out.println("Operator: -");} expr_add_sub_
 	|
 	;
 
@@ -244,9 +244,9 @@ expr_mul_div
 	;
 
 expr_mul_div_
-	: MULT expr_unary expr_mul_div_	{System.out.println("Operator: *");}
-	| DIV expr_unary expr_mul_div_	{System.out.println("Operator: /");}
-	| MOD expr_unary expr_mul_div_	{System.out.println("Operator: %");}
+	: MULT expr_unary	{System.out.println("Operator: *");} expr_mul_div_
+	| DIV expr_unary	{System.out.println("Operator: /");} expr_mul_div_
+	| MOD expr_unary	{System.out.println("Operator: %");} expr_mul_div_
 	|
 	;
 
@@ -259,12 +259,16 @@ expr_unary
 expr_other
 	: LPAR expr RPAR
 	| list
-	| (IDENTIFIER | list_element) (INC | DEC)?
+	| (IDENTIFIER | list_element) (
+		INC		{System.out.println("Operator: ++");}
+		| DEC	{System.out.println("Operator: --");}
+	)?
 	| function_call
 	| primitive_function_call
 	| primitive_value
 	| matching
 	| function_ptr
+	| lambda_function
 	;
 
 function_call
@@ -399,20 +403,6 @@ FOR
 IN
 	: 'in'
 	;
-
-// Types
-
-// INT : 'int' ;
-
-// FLOAT : 'float' ;
-
-// STRING : 'string' ;
-
-// BOOLEAN : 'bool' ;
-
-// LIST : 'list' ;
-
-// FUNCPTR : 'fptr' ;
 
 // Type Values
 

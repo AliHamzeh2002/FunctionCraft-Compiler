@@ -10,11 +10,11 @@ Operator: +
 Operator: +
 FuncDec: create2dList
 Decision: IF
-Operator: is not
+Operator: !=
 FunctionCall
 Operator: <<
-Operator: <<
 Operator: *
+Operator: <<
 Operator: +
 Operator: +
 Decision: ELSE

@@ -1,9 +1,11 @@
+=begin
 def main()
-    a = b - c + d*e/f;
+    a = a << b/c<<d<<e*g;
 
 end
 
-=begin
+=end
+
 def list_printer(l, i)
 end
 
@@ -33,4 +35,3 @@ def main()
     puts(chop(chop(chop("painter"))));
 end
 
-=end

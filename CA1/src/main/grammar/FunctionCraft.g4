@@ -183,7 +183,7 @@ expr_append
 	;
 
 expr_append_
-	: APPEND expr_or {System.out.println("Operator: <<");} expr_append_
+	: APPEND expr_or expr_append_ {System.out.println("Operator: <<");}
 	|
 	;
 
@@ -240,29 +240,33 @@ expr_add_sub_
 	;
 
 expr_mul_div
-	: expr_unary expr_mul_div_
+	: expr_unary_prefix expr_mul_div_
 	;
 
 expr_mul_div_
-	: MULT expr_unary	{System.out.println("Operator: *");} expr_mul_div_
-	| DIV expr_unary	{System.out.println("Operator: /");} expr_mul_div_
-	| MOD expr_unary	{System.out.println("Operator: %");} expr_mul_div_
+	: MULT expr_unary_prefix	{System.out.println("Operator: *");} expr_mul_div_
+	| DIV expr_unary_prefix	{System.out.println("Operator: /");} expr_mul_div_
+	| MOD expr_unary_prefix	{System.out.println("Operator: %");} expr_mul_div_
 	|
 	;
 
-expr_unary
+expr_unary_prefix
 	: NOT LPAR expr RPAR	{System.out.println("Operator: !");}
-	| MINUS expr_other		{System.out.println("Operator: -");}
-	| expr_other
+	| MINUS expr_unary_postfix		{System.out.println("Operator: -");}
+	| expr_unary_postfix
 	;
+
+expr_unary_postfix
+    : expr_other INC	{System.out.println("Operator: ++");}
+    | expr_other DEC	{System.out.println("Operator: --");}
+    | expr_other
+    ;
 
 expr_other
 	: LPAR expr RPAR
 	| list
-	| (IDENTIFIER | list_element) (
-		INC		{System.out.println("Operator: ++");}
-		| DEC	{System.out.println("Operator: --");}
-	)?
+	| list_element
+	| IDENTIFIER
 	| function_call
 	| primitive_function_call
 	| primitive_value

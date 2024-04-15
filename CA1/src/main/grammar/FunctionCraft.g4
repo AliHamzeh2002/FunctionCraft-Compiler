@@ -132,7 +132,7 @@ list_element
 	;
 
 assignment
-	: id = IDENTIFIER { System.out.println("Assignment: " + $id.text); } (
+	: id = IDENTIFIER (
 		LBRACKET expr RBRACKET
 	)* (
 		ASSIGN
@@ -141,7 +141,7 @@ assignment
 		| MOD_ASSIGN
 		| DIV_ASSIGN
 		| MUL_ASSIGN
-	) expr
+	) expr { System.out.println("Assignment: " + $id.text); }
 	;
 
 loop_scope
@@ -183,7 +183,7 @@ expr_append
 	;
 
 expr_append_
-	: APPEND expr_or expr_append_ {System.out.println("Operator: <<");}
+	: APPEND expr_or {System.out.println("Operator: <<");} expr_append_
 	|
 	;
 

@@ -1,12 +1,7 @@
 grammar FunctionCraft;
 
 function_craft
-	: (function | comment | pattern)* main comment*
-	;
-
-comment
-	: SINGLE_LINE_COMMENT
-	| MULTI_LINE_COMMENT
+	: (function | pattern)* main
 	;
 
 main
@@ -20,7 +15,7 @@ pattern
 	;
 
 function_scope
-	: (statement | if_structure | comment)* (return_statement)?
+	: (statement | if_structure)* (return_statement)?
 	;
 
 return_statement
@@ -132,9 +127,7 @@ list_element
 	;
 
 assignment
-	: id = IDENTIFIER (
-		LBRACKET expr RBRACKET
-	)* (
+	: id = IDENTIFIER (LBRACKET expr RBRACKET)* (
 		ASSIGN
 		| ADD_ASSIGN
 		| SUB_ASSIGN
@@ -147,7 +140,6 @@ assignment
 loop_scope
 	: (
 		statement
-		| comment
 		| if_structure_loop
 		| break_if_statement
 		| next_if_statement
@@ -245,22 +237,22 @@ expr_mul_div
 
 expr_mul_div_
 	: MULT expr_unary_prefix	{System.out.println("Operator: *");} expr_mul_div_
-	| DIV expr_unary_prefix	{System.out.println("Operator: /");} expr_mul_div_
-	| MOD expr_unary_prefix	{System.out.println("Operator: %");} expr_mul_div_
+	| DIV expr_unary_prefix		{System.out.println("Operator: /");} expr_mul_div_
+	| MOD expr_unary_prefix		{System.out.println("Operator: %");} expr_mul_div_
 	|
 	;
 
 expr_unary_prefix
-	: NOT LPAR expr RPAR	{System.out.println("Operator: !");}
-	| MINUS expr_unary_postfix		{System.out.println("Operator: -");}
+	: NOT LPAR expr RPAR		{System.out.println("Operator: !");}
+	| MINUS expr_unary_postfix	{System.out.println("Operator: -");}
 	| expr_unary_postfix
 	;
 
 expr_unary_postfix
-    : expr_other INC	{System.out.println("Operator: ++");}
-    | expr_other DEC	{System.out.println("Operator: --");}
-    | expr_other
-    ;
+	: expr_other INC	{System.out.println("Operator: ++");}
+	| expr_other DEC	{System.out.println("Operator: --");}
+	| expr_other
+	;
 
 expr_other
 	: LPAR expr RPAR

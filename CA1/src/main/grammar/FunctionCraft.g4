@@ -92,8 +92,8 @@ condition_or
 	;
 
 condition_or_
-	: OR LPAR expr RPAR condition_or_
-	|
+	: OR LPAR expr RPAR	{System.out.println("Operator: ||");} condition_or_
+	| OR LPAR expr RPAR	{System.out.println("Operator: ||");}
 	;
 
 condition_and
@@ -102,8 +102,8 @@ condition_and
 	;
 
 condition_and_
-	: AND LPAR expr RPAR condition_and_
-	|
+	: AND LPAR expr RPAR	{System.out.println("Operator: &&");} condition_and_
+	| AND LPAR expr RPAR	{System.out.println("Operator: &&");}
 	;
 
 condition_other
@@ -264,7 +264,6 @@ expr_other
 	| primitive_value
 	| matching
 	| function_ptr
-	| lambda_function
 	;
 
 function_call

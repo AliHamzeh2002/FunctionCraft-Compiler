@@ -123,7 +123,9 @@ for_loop
 	;
 
 list_element
-	: (IDENTIFIER | function_call) (LBRACKET expr RBRACKET)+
+	: (IDENTIFIER | function_call | list) (
+		LBRACKET expr RBRACKET
+	)+
 	;
 
 assignment

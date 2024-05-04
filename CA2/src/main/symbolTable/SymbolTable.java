@@ -18,9 +18,9 @@ public class SymbolTable {
             stack.push(top);
             symbolTable.items.putAll(top.items);
         }
-        else{
-            symbolTable.items.putAll(root.items);
-        }
+//        else{
+//            symbolTable.items.putAll(root.items);
+//        }
         top = symbolTable;
     }
     public static void pop() {

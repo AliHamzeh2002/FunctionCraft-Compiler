@@ -116,6 +116,8 @@ public class NameAnalyzer extends Visitor<Void> {
     @Override
     public Void visit(FunctionDeclaration funcDeclaration) {
         for (VarDeclaration arg : funcDeclaration.getArgs()) {
+            if (arg.getName().getName().equals(funcDeclaration.getFunctionName().getName()))
+                nameErrors.add(new IdenticalArgFunctionName(arg.getLine(), arg.getName().getName()));
             arg.accept(this);
         }
         for (Statement stmt : funcDeclaration.getBody()) {
@@ -128,11 +130,6 @@ public class NameAnalyzer extends Visitor<Void> {
     public Void visit(VarDeclaration varDeclaration) {
         if (varDeclaration.getDefaultVal() != null)
             varDeclaration.getDefaultVal().accept(this);
-        try {
-            SymbolTable.root.getItem(FunctionItem.START_KEY + varDeclaration.getName().getName());
-            nameErrors.add(new IdenticalArgFunctionName(varDeclaration.getLine(), varDeclaration.getName().getName()));
-        } catch (ItemNotFound e) {
-        }
         try {
             SymbolTable.top.put(new VarItem(varDeclaration.getName()));
         } catch (ItemAlreadyExists e) {
@@ -324,11 +321,8 @@ public class NameAnalyzer extends Visitor<Void> {
 
     @Override
     public Void visit(PatternDeclaration patternDeclaration) {
-        try {
-            SymbolTable.root.getItem(PatternItem.START_KEY + patternDeclaration.getTargetVariable().getName());
-            nameErrors.add(new IdenticalArgPatternName(patternDeclaration.getLine(), patternDeclaration.getPatternName().getName()));
-        } catch (ItemNotFound e) {
-        }
+        if (patternDeclaration.getTargetVariable().getName().equals(patternDeclaration.getPatternName().getName()))
+            nameErrors.add(new IdenticalArgPatternName(patternDeclaration.getLine(), patternDeclaration.getTargetVariable().getName()));
         try {
             SymbolTable.top.put(new VarItem(patternDeclaration.getTargetVariable()));
         } catch (ItemAlreadyExists e) {

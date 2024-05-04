@@ -22,10 +22,23 @@ program returns [Program flProgram]:
     )*
     m = main{$flProgram.setMain($m.mainRet);};
 
-functionDeclaration returns [FunctionDeclaration functionDeclarationRet]: //TODO:construct functionDeclaration node
+functionDeclaration returns [FunctionDeclaration functionDeclarationRet]: //TODO:construct functionDeclaration node DONE
     def = DEF  id = IDENTIFIER
+    {
+        $functionDeclarationRet = new FunctionDeclaration();
+        Identifier id_ = new Identifier($id.text);
+        id_.setLine($id.line);
+        $functionDeclarationRet.setFunctionName(id_);
+        $functionDeclarationRet.setLine($id.line);
+    }
     f = functionArgumentsDeclaration
+    {
+        $functionDeclarationRet.setArgs($f.argRet);
+    }
     b = body
+    {
+        $functionDeclarationRet.setBody($b.bodyRet);
+    }
     END
     ;
 
@@ -80,13 +93,27 @@ functionArgumentsDeclaration returns [ArrayList<VarDeclaration> argRet]:
     )?
     )? RPAR;
 
-patternMatching returns [PatternDeclaration patternRet]://TODO:cunstruct patterDeclaration node
+patternMatching returns [PatternDeclaration patternRet]://TODO:cunstruct patterDeclaration node DONE~
     pat = PATTERN
     patternName = IDENTIFIER
+    {
+        Identifier id_pattern_ = new Identifier($patternName.text);
+        id_pattern_.setLine($patternName.line);
+    }
     LPAR targetVar = IDENTIFIER
     RPAR
+    {
+        Identifier id_target_ = new Identifier($targetVar.text);
+        id_target_.setLine($targetVar.line);
+        $patternRet = new PatternDeclaration(id_pattern_, id_target_);
+        $patternRet.setLine($patternName.line);
+    }
     (PATTERN_MATCHING_SEPARATOR c = condition
      ASSIGN e = expression
+     {
+        $patternRet.addCondition($c.conditionRet);
+        $patternRet.addReturnExp($e.expRet);
+     }
      )*
     SEMICOLLON;
 
@@ -186,16 +213,29 @@ condition returns [ArrayList<Expression> conditionRet]:
      }
      (RPAR)?)*)*;
 
-putsStatement returns [PutStatement putRet]://TODO:construct putStatement node
+putsStatement returns [PutStatement putRet]://TODO:construct putStatement node DONE
     p = PUTS LPAR e = expression
+    {
+        $putRet = new PutStatement($e.expRet);
+        $putRet.setLine($p.line);
+    }
     RPAR SEMICOLLON;
 
-lenStatement returns [LenStatement lenRet]: //TODO:construct lenStatement node
+lenStatement returns [LenStatement lenRet]: //TODO:construct lenStatement node DONE
     l = LEN LPAR e = expression
+    {
+        $lenRet = new LenStatement($e.expRet);
+        $lenRet.setLine($l.line);
+    }
     RPAR;
 
-pushStatement returns [PushStatement pushRet]://TODO:construct pushStatement node
-    p = PUSH LPAR e1 = expression COMMA e2 = expression RPAR SEMICOLLON
+pushStatement returns [PushStatement pushRet]://TODO:construct pushStatement node DONE
+    p = PUSH LPAR e1 = expression COMMA e2 = expression RPAR
+     {
+        $pushRet = new PushStatement($e1.expRet, $e2.expRet);
+        $pushRet.setLine($p.line);
+
+     }SEMICOLLON
     ;
 
 loopDoStatement returns [LoopDoStatement loopDoRet]:
@@ -221,27 +261,56 @@ loopBody returns [ArrayList<Statement> loopStmts, ArrayList<Expression> loopExps
     r = returnStatement {$loopRetStmt = $r.returnStmtRet;$loopRetStmt.setLine($r.returnStmtRet.getLine());}
     )?;
 
-forStatement returns [ForStatement forStRet]://TODO:construct forStatement node
+forStatement returns [ForStatement forStRet]://TODO:construct forStatement node DONE
     f = FOR id = IDENTIFIER IN r = range
     l = loopBody
+    {
+        Identifier id_ = new Identifier($id.text);
+        id_.setLine($id.line);
+        $forStRet = new ForStatement(id_, $r.rangeRet, $l.loopExps, $l.loopStmts, $l.loopRetStmt);
+        $forStRet.setLine($f.line);
+    }
     END
     ;
 
 range returns [ArrayList<Expression> rangeRet]://TODO:store all expressions that a range can have in rangeRet array
+    {
+        $rangeRet = new ArrayList<Expression>();
+    }
     (LPAR e1 = expression
     DOUBLEDOT e2 = expression
     RPAR)
+    {
+        $rangeRet.add($e1.expRet);
+        $rangeRet.add($e2.expRet);
+    }
     |
      (LBRACK (e3 = expression
+     {
+        $rangeRet.add($e3.expRet);
+     }
     (COMMA e4 = expression
+    {
+        $rangeRet.add($e4.expRet);
+    }
     )*) RBRACK)
     |
      id = IDENTIFIER
+        {
+            Identifier id_ = new Identifier($id.text);
+            id_.setLine($id.line);
+            $rangeRet.add(id_);
+        }
     ;
 
-
-matchPatternStatement returns [MatchPatternStatement matchPatRet]://TODO:construct match pattern node
+matchPatternStatement returns [MatchPatternStatement matchPatRet]://TODO:construct match pattern node DONE
     id = IDENTIFIER DOT m = MATCH LPAR e = expression RPAR
+    {
+        Identifier id_ = new Identifier($id.text);
+        id_.setLine($id.line);
+        $matchPatRet = new MatchPatternStatement(id_, $e.expRet);
+        $matchPatRet.setLine($m.line);
+    }
     ;
 
 chopStatement returns [ChopStatement chopRet]:
@@ -316,9 +385,25 @@ body returns [ArrayList<Statement> bodyRet]:
 
 expression returns [Expression expRet]:
     e1 = expression a = APPEND e2 = eqaulityExpression
+    {
+        if (($e1.expRet instanceof AppendExpression)){
+            AppendExpression e1_expRet = (AppendExpression) $e1.expRet;
+            AppendExpression appendExpression = new AppendExpression(e1_expRet.getAppendee());
+            appendExpression.setAppendeds(e1_expRet.getAppendeds());
+            appendExpression.addAppendedExpression($e2.expRet);
+            appendExpression.setLine(e1_expRet.getLine());
+            $expRet = appendExpression;
+        }
+
+        else{
+            AppendExpression appendExpression = new AppendExpression($e1.expRet);
+            appendExpression.addAppendedExpression($e2.expRet);
+            appendExpression.setLine($a.line);
+            $expRet = appendExpression;
+        }
+    }
     //TODO:construct append expression node.the left most expression is appendee and others are appended.
     | e3 = eqaulityExpression {$expRet = $e3.expRet;};
-
 
 eqaulityExpression returns[Expression expRet]:
     e1 = relationalExpression

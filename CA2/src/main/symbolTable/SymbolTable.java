@@ -14,8 +14,13 @@ public class SymbolTable {
     private static Stack<SymbolTable> stack = new Stack<>();
     private Map<String, SymbolTableItem> items;
     public static void push(SymbolTable symbolTable) {
-        if (top != null)
+        if (top != null) {
             stack.push(top);
+            symbolTable.items.putAll(top.items);
+        }
+        else{
+            symbolTable.items.putAll(root.items);
+        }
         top = symbolTable;
     }
     public static void pop() {

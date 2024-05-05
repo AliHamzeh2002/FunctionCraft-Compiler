@@ -2,6 +2,7 @@ package main.visitor.nameAnalyzer;
 
 import main.ast.nodes.Program;
 import main.ast.nodes.declaration.FunctionDeclaration;
+import main.ast.nodes.declaration.VarDeclaration;
 import main.ast.nodes.expression.*;
 import main.ast.nodes.statement.*;
 import main.compileError.CompileError;
@@ -14,23 +15,19 @@ import java.util.List;
 
 public class DependencyDetector extends Visitor<Void> {
     public ArrayList<CompileError> dependencyError = new ArrayList<>();
-    private Graph dependencyGraph = new Graph();
+    private final Graph dependencyGraph = new Graph();
     private String currentFunctionName;
 
     @Override
     public Void visit(Program program){
-        for(FunctionDeclaration functionDeclaration : program.getFunctionDeclarations()){
-            functionDeclaration.accept(this);
-        }
-
+        program.getFunctionDeclarations().forEach(e -> e.accept(this));
         return null;
     }
     @Override
     public Void visit(FunctionDeclaration functionDeclaration) {
         currentFunctionName = functionDeclaration.getFunctionName().getName();
-        for (Statement stmt : functionDeclaration.getBody()) {
-            stmt.accept(this);
-        }
+        functionDeclaration.getArgs().forEach(e -> e.accept(this));
+        functionDeclaration.getBody().forEach(e -> e.accept(this));
         return null;
     }
 
@@ -49,6 +46,12 @@ public class DependencyDetector extends Visitor<Void> {
         return null;
     }
 
+    @Override
+    public Void visit(VarDeclaration varDeclaration) {
+        if (varDeclaration.getDefaultVal() != null)
+            varDeclaration.getDefaultVal().accept(this);
+        return null;
+    }
 
     @Override
     public Void visit(AssignStatement assignStatement) {
@@ -73,42 +76,26 @@ public class DependencyDetector extends Visitor<Void> {
 
     @Override
     public Void visit(ForStatement forStatement) {
-        for (var expr : forStatement.getRangeExpressions()){
-            expr.accept(this);
-        }
-        for (var expr : forStatement.getLoopBodyExpressions()){
-            expr.accept(this);
-        }
-        for (var stmt : forStatement.getLoopBody()){
-            stmt.accept(this);
-        }
+        forStatement.getRangeExpressions().forEach(e -> e.accept(this));
+        forStatement.getLoopBody().forEach(e -> e.accept(this));
+        forStatement.getLoopBodyExpressions().forEach(e -> e.accept(this));
         forStatement.getReturnStatement().accept(this);
         return null;
     }
 
     @Override
     public Void visit(LoopDoStatement loopDoStatement) {
-        for (var expr : loopDoStatement.getLoopConditions()){
-            expr.accept(this);
-        }
-        for (var stmt : loopDoStatement.getLoopBodyStmts()){
-            stmt.accept(this);
-        }
+        loopDoStatement.getLoopConditions().forEach(e -> e.accept(this));
+        loopDoStatement.getLoopBodyStmts().forEach(e -> e.accept(this));
         loopDoStatement.getLoopRetStmt().accept(this);
         return null;
     }
 
     @Override
     public Void visit(IfStatement ifStatement) {
-        for (var condition : ifStatement.getConditions()){
-            condition.accept(this);
-        }
-        for (var stmt : ifStatement.getThenBody()){
-            stmt.accept(this);
-        }
-        for (var stmt : ifStatement.getElseBody()){
-            stmt.accept(this);
-        }
+        ifStatement.getConditions().forEach(e -> e.accept(this));
+        ifStatement.getThenBody().forEach(e -> e.accept(this));
+        ifStatement.getElseBody().forEach(e -> e.accept(this));
         return null;
     }
 
@@ -177,10 +164,7 @@ public class DependencyDetector extends Visitor<Void> {
 
     public Void findDependency(){
         List<List<String>> cycles = dependencyGraph.findCycles();
-        for (List<String> cycle : cycles) {
-            dependencyError.add(new CircularDependency(cycle));
-        }
-
+        cycles.forEach(e -> dependencyError.add(new CircularDependency(e)));
         return null;
     }
 

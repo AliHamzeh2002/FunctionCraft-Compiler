@@ -121,9 +121,7 @@ public class NameAnalyzer extends Visitor<Void> {
                 nameErrors.add(new IdenticalArgFunctionName(arg.getLine(), arg.getName().getName()));
             arg.accept(this);
         }
-        for (Statement stmt : funcDeclaration.getBody()) {
-            stmt.accept(this);
-        }
+        funcDeclaration.getBody().forEach(e -> e.accept(this));
         return null;
     }
 
@@ -148,9 +146,7 @@ public class NameAnalyzer extends Visitor<Void> {
     @Override
     public Void visit(AppendExpression appendExpression) {
         appendExpression.getAppendee().accept(this);
-        for (Expression appended : appendExpression.getAppendeds()) {
-            appended.accept(this);
-        }
+        appendExpression.getAppendeds().forEach(e -> e.accept(this));
         return null;
     }
 
@@ -333,31 +329,21 @@ public class NameAnalyzer extends Visitor<Void> {
             SymbolTable.top.put(new VarItem(patternDeclaration.getTargetVariable()));
         } catch (ItemAlreadyExists e) {
         }
-        for (Expression condition : patternDeclaration.getConditions()) {
-            condition.accept(this);
-        }
-        for (Expression returnExp : patternDeclaration.getReturnExp()) {
-            returnExp.accept(this);
-        }
+        patternDeclaration.getConditions().forEach(e -> e.accept(this));
+        patternDeclaration.getReturnExp().forEach(e -> e.accept(this));
         return null;
     }
 
     @Override
     public Void visit(IfStatement ifStatement) {
-        for (Expression condition : ifStatement.getConditions()) {
-            condition.accept(this);
-        }
+        ifStatement.getConditions().forEach(e -> e.accept(this));
         var thenSymbolTable = new SymbolTable();
         SymbolTable.push(thenSymbolTable);
-        for (Statement stmt : ifStatement.getThenBody()) {
-            stmt.accept(this);
-        }
+        ifStatement.getThenBody().forEach(e -> e.accept(this));
         SymbolTable.pop();
         var elseSymbolTable = new SymbolTable();
         SymbolTable.push(elseSymbolTable);
-        for (Statement stmt : ifStatement.getElseBody()) {
-            stmt.accept(this);
-        }
+        ifStatement.getElseBody().forEach(e -> e.accept(this));
         SymbolTable.pop();
         return null;
     }
@@ -371,15 +357,9 @@ public class NameAnalyzer extends Visitor<Void> {
             SymbolTable.top.put(new VarItem(id));
         } catch (ItemAlreadyExists e) {
         }
-        for (Expression rangeExp : forStatement.getRangeExpressions()) {
-            rangeExp.accept(this);
-        }
-        for (Expression loopBodyExp : forStatement.getLoopBodyExpressions()) {
-            loopBodyExp.accept(this);
-        }
-        for (Statement stmt : forStatement.getLoopBody()) {
-            stmt.accept(this);
-        }
+        forStatement.getRangeExpressions().forEach(e -> e.accept(this));
+        forStatement.getLoopBodyExpressions().forEach(e -> e.accept(this));
+        forStatement.getLoopBody().forEach(e -> e.accept(this));
         if (forStatement.getReturnStatement() != null)
             forStatement.getReturnStatement().accept(this);
         SymbolTable.pop();
@@ -390,12 +370,8 @@ public class NameAnalyzer extends Visitor<Void> {
     public Void visit(LoopDoStatement loopDoStatement) {
         var loopDoSymbolTable = new SymbolTable();
         SymbolTable.push(loopDoSymbolTable);
-        for (Statement stmt : loopDoStatement.getLoopBodyStmts()) {
-            stmt.accept(this);
-        }
-        for (Expression condition : loopDoStatement.getLoopConditions()) {
-            condition.accept(this);
-        }
+        loopDoStatement.getLoopBodyStmts().forEach(e -> e.accept(this));
+        loopDoStatement.getLoopConditions().forEach(e -> e.accept(this));
         if (loopDoStatement.getLoopRetStmt() != null)
             loopDoStatement.getLoopRetStmt().accept(this);
         SymbolTable.pop();

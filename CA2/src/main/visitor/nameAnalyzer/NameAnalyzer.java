@@ -20,6 +20,7 @@ import main.symbolTable.exceptions.ItemAlreadyExists;
 import main.symbolTable.exceptions.ItemNotFound;
 import main.symbolTable.item.FunctionItem;
 import main.symbolTable.item.PatternItem;
+import main.symbolTable.item.SymbolTableItem;
 import main.symbolTable.item.VarItem;
 import main.visitor.Visitor;
 
@@ -176,8 +177,10 @@ public class NameAnalyzer extends Visitor<Void> {
             return null;
         }
         ArrayList<VarDeclaration> functionArgs = null;
-        if (accessExpression.getAccessedExpression() instanceof LambdaExpression)
+        if (accessExpression.getAccessedExpression() instanceof LambdaExpression) {
             functionArgs = ((LambdaExpression) accessExpression.getAccessedExpression()).getDeclarationArgs();
+            accessExpression.getAccessedExpression().accept(this);
+        }
         else if (accessExpression.getAccessedExpression() instanceof Identifier) {
             try {
                 var funcDeclaration = ((FunctionItem) SymbolTable.root
@@ -281,12 +284,15 @@ public class NameAnalyzer extends Visitor<Void> {
 
     @Override
     public Void visit(LambdaExpression lambdaExpression) {
+        SymbolTable lambdaExpressionSymbolTable = new SymbolTable();
+        SymbolTable.push(lambdaExpressionSymbolTable);
         for (var arg : lambdaExpression.getDeclarationArgs()) {
             arg.accept(this);
         }
         for (var stmt : lambdaExpression.getBody()) {
             stmt.accept(this);
         }
+        SymbolTable.pop();
         return null;
     }
 

@@ -1,15 +1,8 @@
-def f(a, b)
-    f = 1;
-end
-
-def c(c)
+def f(a)
 
 end
-
-pattern h(h)
-    | (h == 0) = 1;
 
 def main()
-    a = method(:f);
+   a(1)();
 
 end

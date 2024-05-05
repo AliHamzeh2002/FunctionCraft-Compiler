@@ -162,10 +162,9 @@ public class DependencyDetector extends Visitor<Void> {
         return null;
     }
 
-    public Void findDependency(){
+    public void findDependency(){
         List<List<String>> cycles = dependencyGraph.findCycles();
         cycles.forEach(e -> dependencyError.add(new CircularDependency(e)));
-        return null;
     }
 
 }

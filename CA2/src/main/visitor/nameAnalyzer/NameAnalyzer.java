@@ -8,10 +8,6 @@ import main.ast.nodes.declaration.VarDeclaration;
 import main.ast.nodes.expression.*;
 import main.ast.nodes.expression.value.FunctionPointer;
 import main.ast.nodes.expression.value.ListValue;
-import main.ast.nodes.expression.value.primitive.BoolValue;
-import main.ast.nodes.expression.value.primitive.FloatValue;
-import main.ast.nodes.expression.value.primitive.IntValue;
-import main.ast.nodes.expression.value.primitive.StringValue;
 import main.ast.nodes.statement.*;
 import main.compileError.CompileError;
 import main.compileError.nameErrors.*;
@@ -20,7 +16,6 @@ import main.symbolTable.exceptions.ItemAlreadyExists;
 import main.symbolTable.exceptions.ItemNotFound;
 import main.symbolTable.item.FunctionItem;
 import main.symbolTable.item.PatternItem;
-import main.symbolTable.item.SymbolTableItem;
 import main.symbolTable.item.VarItem;
 import main.visitor.Visitor;
 
@@ -92,9 +87,7 @@ public class NameAnalyzer extends Visitor<Void> {
                 break;
             minArgs += 1;
         }
-        if (callArgs.size() < minArgs || callArgs.size() > maxArgs)
-            return false;
-        return true;
+        return callArgs.size() >= minArgs && callArgs.size() <= maxArgs;
     }
 
     @Override
@@ -273,7 +266,7 @@ public class NameAnalyzer extends Visitor<Void> {
         } else {
             try {
                 SymbolTable.top.put(new VarItem(id));
-            } catch (ItemAlreadyExists e) {
+            } catch (ItemAlreadyExists ignored) {
             }
         }
         assignStatement.getAssignExpression().accept(this);
@@ -332,7 +325,7 @@ public class NameAnalyzer extends Visitor<Void> {
             nameErrors.add(new IdenticalArgPatternName(patternDeclaration.getLine(), patternDeclaration.getTargetVariable().getName()));
         try {
             SymbolTable.top.put(new VarItem(patternDeclaration.getTargetVariable()));
-        } catch (ItemAlreadyExists e) {
+        } catch (ItemAlreadyExists ignored) {
         }
         patternDeclaration.getConditions().forEach(e -> e.accept(this));
         patternDeclaration.getReturnExp().forEach(e -> e.accept(this));
@@ -360,7 +353,7 @@ public class NameAnalyzer extends Visitor<Void> {
         Identifier id = forStatement.getIteratorId();
         try {
             SymbolTable.top.put(new VarItem(id));
-        } catch (ItemAlreadyExists e) {
+        } catch (ItemAlreadyExists ignored) {
         }
         forStatement.getRangeExpressions().forEach(e -> e.accept(this));
         forStatement.getLoopBodyExpressions().forEach(e -> e.accept(this));

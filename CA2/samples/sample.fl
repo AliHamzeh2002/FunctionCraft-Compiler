@@ -3,6 +3,10 @@ def y()
     return z();
 end
 
+def func3()
+    return func3();
+end
+
 def z()
     return hh();
 end

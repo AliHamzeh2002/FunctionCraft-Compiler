@@ -82,6 +82,21 @@ public class NameAnalyzer extends Visitor<Void> {
         return patternItems;
     }
 
+    private boolean hasEnoughArgs(ArrayList<Expression> callArgs, ArrayList<VarDeclaration> functionArgs) {
+        if (functionArgs == null)
+            return true;
+        int maxArgs = functionArgs.size();
+        int minArgs = 0;
+        for (var arg : functionArgs) {
+            if (arg.getDefaultVal() != null)
+                break;
+            minArgs += 1;
+        }
+        if (callArgs.size() < minArgs || callArgs.size() > maxArgs)
+            return false;
+        return true;
+    }
+
     @Override
     public Void visit(Program program) {
         SymbolTable.init();
@@ -165,9 +180,7 @@ public class NameAnalyzer extends Visitor<Void> {
 
     @Override
     public Void visit(AccessExpression accessExpression) {
-        for (var dimensionAccess : accessExpression.getDimentionalAccess()) {
-            dimensionAccess.accept(this);
-        }
+        accessExpression.getDimentionalAccess().forEach(e -> e.accept(this));
         if (!accessExpression.isFunctionCall()) {
             accessExpression.getAccessedExpression().accept(this);
             return null;
@@ -188,19 +201,11 @@ public class NameAnalyzer extends Visitor<Void> {
                 nameErrors.add(new FunctionNotDeclared(accessExpression.getLine(), ((Identifier) accessExpression.getAccessedExpression()).getName()));
             }
         }
-        for (var arg : accessExpression.getArguments()) {
-            arg.accept(this);
+        else{
+            accessExpression.getAccessedExpression().accept(this);
         }
-        if (functionArgs == null)
-            return null;
-        int maxArgs = functionArgs.size();
-        int minArgs = 0;
-        for (var arg : functionArgs) {
-            if (arg.getDefaultVal() != null)
-                break;
-            minArgs += 1;
-        }
-        if (accessExpression.getArguments().size() < minArgs || accessExpression.getArguments().size() > maxArgs) {
+        accessExpression.getArguments().forEach(e -> e.accept(this));
+        if (!hasEnoughArgs(accessExpression.getArguments(), functionArgs)) {
             nameErrors.add(new ArgMisMatch(accessExpression.getLine(), accessExpression.getAccessedExpression().toString()));
         }
         return null;

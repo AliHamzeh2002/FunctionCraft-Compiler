@@ -59,7 +59,7 @@ functionArgumentsDeclaration
 		)* (
 			COMMA LBRACK id3 = IDENTIFIER {
         Identifier id_3 = new Identifier($id3.text);
-        id_.setLine($id3.line);
+        id_3.setLine($id3.line);
         VarDeclaration newVarDec3 = new VarDeclaration(id_3);
         newVarDec3.setLine($id3.line);
      } ASSIGN e1 = expression {
@@ -69,7 +69,7 @@ functionArgumentsDeclaration
 				COMMA id4 = IDENTIFIER {
             Identifier id_4 = new Identifier($id4.text);
             id_4.setLine($id4.line);
-            VarDeclaration newVarDec4 = new VarDeclaration(id_);
+            VarDeclaration newVarDec4 = new VarDeclaration(id_4);
             newVarDec4.setLine($id4.line);
        } ASSIGN e2 = expression {
             newVarDec4.setDefaultVal($e2.expRet);

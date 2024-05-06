@@ -42,8 +42,6 @@ end
 def main()
     a = 5;
     b = 6;
-    (h+1)(2);
-
     puts("salam");
     myFunc(c, b);
     myfunc2(a, b);

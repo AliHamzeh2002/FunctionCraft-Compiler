@@ -430,7 +430,7 @@ public class FunctionCraftParser extends Parser {
 					((FunctionArgumentsDeclarationContext)_localctx).id3 = match(IDENTIFIER);
 
 					        Identifier id_3 = new Identifier((((FunctionArgumentsDeclarationContext)_localctx).id3!=null?((FunctionArgumentsDeclarationContext)_localctx).id3.getText():null));
-					        id_.setLine((((FunctionArgumentsDeclarationContext)_localctx).id3!=null?((FunctionArgumentsDeclarationContext)_localctx).id3.getLine():0));
+					        id_3.setLine((((FunctionArgumentsDeclarationContext)_localctx).id3!=null?((FunctionArgumentsDeclarationContext)_localctx).id3.getLine():0));
 					        VarDeclaration newVarDec3 = new VarDeclaration(id_3);
 					        newVarDec3.setLine((((FunctionArgumentsDeclarationContext)_localctx).id3!=null?((FunctionArgumentsDeclarationContext)_localctx).id3.getLine():0));
 					     
@@ -455,7 +455,7 @@ public class FunctionCraftParser extends Parser {
 
 						            Identifier id_4 = new Identifier((((FunctionArgumentsDeclarationContext)_localctx).id4!=null?((FunctionArgumentsDeclarationContext)_localctx).id4.getText():null));
 						            id_4.setLine((((FunctionArgumentsDeclarationContext)_localctx).id4!=null?((FunctionArgumentsDeclarationContext)_localctx).id4.getLine():0));
-						            VarDeclaration newVarDec4 = new VarDeclaration(id_);
+						            VarDeclaration newVarDec4 = new VarDeclaration(id_4);
 						            newVarDec4.setLine((((FunctionArgumentsDeclarationContext)_localctx).id4!=null?((FunctionArgumentsDeclarationContext)_localctx).id4.getLine():0));
 						       
 						setState(118);
@@ -1777,6 +1777,7 @@ public class FunctionCraftParser extends Parser {
 				setState(330);
 				((RangeContext)_localctx).e3 = expression(0);
 
+						((RangeContext)_localctx).rangeRet =  new ArrayList<Expression>();
 				        _localctx.rangeRet.add(((RangeContext)_localctx).e3.expRet);
 				     
 				setState(338);
@@ -1810,6 +1811,7 @@ public class FunctionCraftParser extends Parser {
 				setState(343);
 				((RangeContext)_localctx).id = match(IDENTIFIER);
 
+					        ((RangeContext)_localctx).rangeRet =  new ArrayList<Expression>();
 				            Identifier id_ = new Identifier((((RangeContext)_localctx).id!=null?((RangeContext)_localctx).id.getText():null));
 				            id_.setLine((((RangeContext)_localctx).id!=null?((RangeContext)_localctx).id.getLine():0));
 				            _localctx.rangeRet.add(id_);

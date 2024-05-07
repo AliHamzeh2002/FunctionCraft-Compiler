@@ -39,7 +39,10 @@ public class DependencyDetector extends Visitor<Void> {
             return null;
         }
         if (accessExpression.getAccessedExpression() instanceof Identifier) {
-            dependencyGraph.addEdge(currentFunctionName, ((Identifier) accessExpression.getAccessedExpression()).getName());
+            String from = currentFunctionName;
+            String to = ((Identifier) accessExpression.getAccessedExpression()).getName();
+            if (!from.equals(to))
+                dependencyGraph.addEdge(from, to);
             return null;
         }
         accessExpression.getAccessedExpression().accept(this);

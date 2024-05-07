@@ -262,6 +262,7 @@ range
 	| (
 		LBRACK (
 			e3 = expression {
+		$rangeRet = new ArrayList<Expression>();
         $rangeRet.add($e3.expRet);
      } (
 				COMMA e4 = expression {
@@ -271,6 +272,7 @@ range
 		) RBRACK
 	)
 	| id = IDENTIFIER {
+	        $rangeRet = new ArrayList<Expression>();
             Identifier id_ = new Identifier($id.text);
             id_.setLine($id.line);
             $rangeRet.add(id_);

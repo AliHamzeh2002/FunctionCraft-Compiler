@@ -140,7 +140,7 @@ public class NameAnalyzer extends Visitor<Void> {
         try {
             SymbolTable.top.put(new VarItem(varDeclaration.getName()));
         } catch (ItemAlreadyExists e) {
-            nameErrors.add(new DuplicateArg(varDeclaration.getLine(), varDeclaration.getName().getName()));
+            //nameErrors.add(new DuplicateArg(varDeclaration.getLine(), varDeclaration.getName().getName()));
         }
         return null;
     }

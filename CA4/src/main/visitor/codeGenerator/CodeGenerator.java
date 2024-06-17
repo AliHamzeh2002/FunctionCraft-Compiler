@@ -3,6 +3,7 @@ package main.visitor.codeGenerator;
 import main.ast.nodes.Program;
 import main.ast.nodes.declaration.FunctionDeclaration;
 import main.ast.nodes.declaration.MainDeclaration;
+import main.ast.nodes.declaration.VarDeclaration;
 import main.ast.nodes.expression.*;
 import main.ast.nodes.expression.operators.BinaryOperator;
 import main.ast.nodes.expression.value.FunctionPointer;
@@ -13,6 +14,7 @@ import main.ast.nodes.expression.value.primitive.StringValue;
 import main.ast.nodes.statement.*;
 import main.ast.type.FptrType;
 import main.ast.type.ListType;
+import main.ast.type.NoType;
 import main.ast.type.Type;
 import main.ast.type.primitiveType.BoolType;
 import main.ast.type.primitiveType.IntType;
@@ -63,11 +65,12 @@ public class CodeGenerator extends Visitor<String> {
         String type = "";
         switch (element){
             case StringType stringType -> type += "Ljava/lang/String;";
-            case IntType intType -> type += "Ljava/lang/Integer;";
+            case IntType intType -> type += "I";
             case FptrType fptrType -> type += "LFptr;";
             case ListType listType -> type += "LList;";
-            case BoolType boolType -> type += "Ljava/lang/Boolean;";
+            case BoolType boolType -> type += "Z";
             case null, default -> {
+                type += "V";
             }
         }
         return type;
@@ -166,17 +169,61 @@ public class CodeGenerator extends Visitor<String> {
     @Override
     public String visit(FunctionDeclaration functionDeclaration){
         slots.clear();
+        FunctionItem functionItem = null;
+        try {
+            functionItem = (FunctionItem) SymbolTable.root.getItem(FunctionItem.START_KEY + functionDeclaration.getFunctionName().getName());
+           // SymbolTable.push(functionItem.getFunctionSymbolTable());
+        } catch (ItemNotFound e) {
+        }
 
-        String commands = "";
-        String args = ""; // TODO and add to the slots
-        String returnType = ""; // TODO
-        commands += ".method public " + functionDeclaration.getFunctionName().getName();
-        commands += args + returnType + "\n";
-        // TODO headers, body and return with corresponding type
+        functionDeclaration.accept(typeChecker);
 
-        addCommand(commands);
+        String name = functionItem.getName();
+        //funcsReturnType.put(name, returnType);
+        Type returnType = functionItem.getReturnType();
+        ArrayList<String> argsTypeSign = new ArrayList<String>();
+
+        for (Type argType : functionItem.getArgumentTypes()) {
+            argsTypeSign.add(getType(argType));
+        }
+        for (VarDeclaration arg : functionDeclaration.getArgs()) {
+            slotOf(arg.getName().getName());
+        }
+
+        ArrayList<String> bodyStmts = new ArrayList<String>();
+        for (var stmt : functionDeclaration.getBody())
+            bodyStmts.add(stmt.accept(this));
+
+        StringBuilder commands = new StringBuilder();
+        commands.append(".method public static ");
+
+        commands.append(name).append('(');
+        for (String arg : argsTypeSign)
+            commands.append(arg);
+
+        commands.append(')')
+                .append(getType(returnType))
+                .append('\n')
+                .append(".limit stack ")
+                .append("128\n")
+                .append(".limit locals ")
+                .append("128\n");
+
+        for (String stmt : bodyStmts)
+            commands.append(stmt).append('\n');
+
+        if (returnType == null &&
+                !String.join(" ", commands.toString().split("\n")).endsWith("return"))
+            commands.append("return\n");
+        commands.append(".end method\n\n\n");
+
+        for (var comm : commands.toString().split("\n"))
+            addCommand(comm);
+
+        addCommand("\n");
+        //SymbolTable.pop();
         return null;
-    }
+}
     @Override
     public String visit(MainDeclaration mainDeclaration){
         slots.clear();
@@ -200,7 +247,8 @@ public class CodeGenerator extends Visitor<String> {
         return null;
     }
     public String visit(AccessExpression accessExpression){
-        if (accessExpression.isFunctionCall()) {
+        return "";
+        /*if (accessExpression.isFunctionCall()) {
             Identifier functionName = (Identifier)accessExpression.getAccessedExpression();
             String args = ""; // TODO
             String returnType = ""; // TODO
@@ -210,7 +258,7 @@ public class CodeGenerator extends Visitor<String> {
             // TODO
         }
         //TODO
-        return null;
+        return null;*/
     }
     @Override
     public String visit(AssignStatement assignStatement){
@@ -230,7 +278,10 @@ public class CodeGenerator extends Visitor<String> {
         }
         else {
             stmts.add(assignStatement.getAssignExpression().accept(this));
-            stmts.add("istore " + index);
+            if (typeR instanceof IntType || typeR instanceof BoolType)
+                stmts.add("istore " + index);
+            else
+                stmts.add("astore " + index);
         }
 
         //isAssignment = false;
@@ -278,21 +329,21 @@ public class CodeGenerator extends Visitor<String> {
 
     @Override
     public String visit(ReturnStatement returnStatement){
-        if (returnStatement.hasRetExpression()) {
-            addCommand("return\n");
-            return null;
+        ArrayList<String> stmts = new ArrayList<>();
+        if (!returnStatement.hasRetExpression()) {
+            return "return";
         }
         Type type = returnStatement.getReturnExp().accept(typeChecker);
-        addCommand(returnStatement.getReturnExp().accept(this));
+        stmts.add(returnStatement.getReturnExp().accept(this));
         if (type instanceof IntType) {
-            addCommand("invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;\n");
-            addCommand("ireturn\n");
-            return null;
+            //stmts.add("invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;");
+            stmts.add("ireturn");
+            return String.join("\n", stmts);
         }
-        else if (type instanceof BoolType)
-            addCommand("invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;\n");
-        addCommand("areturn\n");
-        return null;
+//        else if (type instanceof BoolType)
+//            stmts.add("invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;");
+        stmts.add("areturn");
+        return String.join("\n", stmts);
     }
 
     @Override
@@ -415,8 +466,7 @@ public class CodeGenerator extends Visitor<String> {
             String typeSign = "a";
             if (type instanceof IntType)
                 typeSign = "i";
-            System.out.println(identifier.getName() + typeSign + type);
-            command += typeSign + "load " + slotOf(identifier.getName()) + "\n";
+            command += typeSign + "load " + slotOf(identifier.getName());
 //            if (type instanceof IntType)
 //                command += "invokevirtual java/lang/Integer/intValue()I";
 //            else if (type instanceof BoolType)
@@ -502,8 +552,25 @@ public class CodeGenerator extends Visitor<String> {
     }
     @Override
     public String visit(ListValue listValue){
-        //TODO
-        return null;
+        ArrayList<String> stmts = new ArrayList<>();
+        stmts.add("new java/util/ArrayList");
+        stmts.add("dup");
+        stmts.add("invokespecial java/util/ArrayList/<init>()V");
+        int tempvar = slotOf("");
+        stmts.add("astore " + tempvar);
+        stmts.add("new List");
+        stmts.add("dup");
+        stmts.add("aload " + tempvar);
+        stmts.add("invokespecial List/<init>(Ljava/util/ArrayList;)V");
+        for (Expression element : listValue.getElements()) {
+            stmts.add("aload " + tempvar);
+            stmts.add(element.accept(this));
+            //cast to Integer
+            stmts.add("invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;");
+            stmts.add("invokevirtual java/util/ArrayList/add(Ljava/lang/Object;)Z");
+            stmts.add("pop");
+        }
+        return String.join("\n", stmts);
     }
     @Override
     public String visit(IntValue intValue){

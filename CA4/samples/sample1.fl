@@ -28,11 +28,11 @@ end
 
 =end
 
+def f(a, b)
+    return a + b;
+end
+
 def main()
-    puts(0);
     a = 1;
-    if (a == 1)
-        b = 1;
-        puts(b);
-    end
+    f(10, 11);
 end

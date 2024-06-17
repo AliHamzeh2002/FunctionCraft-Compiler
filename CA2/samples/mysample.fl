@@ -1,50 +1,9 @@
-
-def y()
-    return z();
+def x()    g();
 end
-
-def z()
-    return hh();
+def foo()    foo();
+    x();
 end
-
-def hh()
-    y();
-end
-
-def f()
-    g();
-end
-
-def g()
-    return f();
-end
-
-def h()
-    a = 1;
-    b = 2;
-    return myfunc2(a, b);
-end
-
-
-def myfunc2(a, b, [c=1])
-    return;
-end
-
-def myfunc2()
-    return;
-end
-
-
-def aa(a, b, c)
-    return a+b+c;
-end
-
+def g()    foo();
+    g();end
 def main()
-    a = 5;
-    b = 6;
-    puts("salam");
-    myFunc(c, b);
-    myfunc2(a, b);
-    ali(a);
-    aa(a, b);
-end
+    g();end

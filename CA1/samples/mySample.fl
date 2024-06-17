@@ -1,3 +1,11 @@
-def main()
+def foo()
+    loop do
+        if(true)
+            break;
+        end
+    end
+end
 
+def main()
+    foo();
 end

@@ -172,11 +172,11 @@ public class CodeGenerator extends Visitor<String> {
         FunctionItem functionItem = null;
         try {
             functionItem = (FunctionItem) SymbolTable.root.getItem(FunctionItem.START_KEY + functionDeclaration.getFunctionName().getName());
-           // SymbolTable.push(functionItem.getFunctionSymbolTable());
+            SymbolTable.push(functionItem.getFunctionSymbolTable());
         } catch (ItemNotFound e) {
         }
 
-        functionDeclaration.accept(typeChecker);
+        //functionDeclaration.accept(typeChecker);
 
         String name = functionItem.getName();
         //funcsReturnType.put(name, returnType);
@@ -221,7 +221,7 @@ public class CodeGenerator extends Visitor<String> {
             addCommand(comm);
 
         addCommand("\n");
-        //SymbolTable.pop();
+        SymbolTable.pop();
         return null;
 }
     @Override

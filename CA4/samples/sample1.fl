@@ -29,10 +29,10 @@ end
 =end
 
 def f(a, b)
-    return a + b;
+    puts(a);
+    f(a + 1, b);
 end
 
 def main()
-    a = 1;
     f(10, 11);
 end

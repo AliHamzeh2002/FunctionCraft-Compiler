@@ -57,6 +57,7 @@ public class TypeChecker extends Visitor<Type> {
         try {
             FunctionItem functionItem = (FunctionItem) SymbolTable.root.getItem(FunctionItem.START_KEY +
                     functionDeclaration.getFunctionName().getName());
+            functionItem.setFunctionSymbolTable(SymbolTable.top);
             ArrayList<Type> currentArgTypes = functionItem.getArgumentTypes();
             for (int i = 0; i < functionDeclaration.getArgs().size(); i++) {
                 VarItem argItem = new VarItem(functionDeclaration.getArgs().get(i).getName());

@@ -122,3 +122,35 @@ Label14:
   14: return
 .end method
 
+.method public getSize()I
+  .limit stack 32
+  .limit locals 32
+  .var 0 is this LList; from Label0 to Label7
+Label0:
+  .line 27
+  0: aload_0
+  1: getfield List/elements Ljava/util/ArrayList;
+  4: invokevirtual java/util/ArrayList/size()I
+Label7:
+  7: ireturn
+.end method
+
+.method public addElement(Ljava/lang/Object;)V
+  .limit stack 3
+  .limit locals 2
+  .var 0 is this LList; from Label0 to Label13
+  .var 1 is o Ljava/lang/Object; from Label0 to Label13
+Label0:
+  .line 29
+  0: aload_0
+  1: getfield List/elements Ljava/util/ArrayList;
+  4: aload_0
+  5: aload_1
+  6: invokevirtual List/getNewObject(Ljava/lang/Object;)Ljava/lang/Object;
+  9: invokevirtual java/util/ArrayList/add(Ljava/lang/Object;)Z
+  12: pop
+Label13:
+  13: return
+.end method
+
+

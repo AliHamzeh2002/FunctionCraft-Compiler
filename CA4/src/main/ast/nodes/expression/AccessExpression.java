@@ -15,6 +15,12 @@ public class AccessExpression extends Expression{
         return isFunctionCall;
     }
 
+    public AccessExpression(Expression accessedExpression, Expression dimentionalAccess){
+        this.accessedExpression = accessedExpression;
+        this.dimentionalAccess.add(dimentionalAccess);
+
+    }
+
     public AccessExpression(Expression accessedExpression, ArrayList<Expression> arguments){
         this.accessedExpression = accessedExpression;
         this.arguments = arguments;

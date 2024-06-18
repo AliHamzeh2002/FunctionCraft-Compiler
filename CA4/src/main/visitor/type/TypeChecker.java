@@ -243,6 +243,7 @@ public class TypeChecker extends Visitor<Type> {
     @Override
     public Type visit(IfStatement ifStatement){
         SymbolTable.push(SymbolTable.top.copy());
+        ifStatement.setSymbolTable(SymbolTable.top);
         for(Expression expression : ifStatement.getConditions())
             if(!(expression.accept(this) instanceof BoolType))
                 typeErrors.add(new ConditionIsNotBool(expression.getLine()));
@@ -256,6 +257,7 @@ public class TypeChecker extends Visitor<Type> {
     @Override
     public Type visit(LoopDoStatement loopDoStatement){
         SymbolTable.push(SymbolTable.top.copy());
+        loopDoStatement.setSymbolTable(SymbolTable.top);
         for(Statement statement : loopDoStatement.getLoopBodyStmts())
             statement.accept(this);
         SymbolTable.pop();

@@ -33,7 +33,6 @@ public class FunctionCraft {
             System.out.println(compileError.getErrorMessage());
         }
         fileWriter.close();
-
         CodeGenerator codeGenerator = new CodeGenerator(typeChecker);
         codeGenerator.visit(program);
 

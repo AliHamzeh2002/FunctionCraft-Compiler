@@ -37,6 +37,8 @@ public class CodeGenerator extends Visitor<String> {
     private final TypeChecker typeChecker;
     private final Set<String> visited;
     private FunctionItem curFunction;
+
+    private final HashMap<String, Type> returnTypes = new HashMap<>();
     private final HashMap<String, Integer> slots = new HashMap<>();
 
     private Stack<String> loopStartLabels = new Stack<>();
@@ -51,8 +53,8 @@ public class CodeGenerator extends Visitor<String> {
     }
     private int slotOf(String var) {
         if (!slots.containsKey(var)) {
-            slots.put(var, slots.size());
-            return slots.size() - 1;
+            slots.put(var, slots.size() + 1);
+            return slots.size();
         }
         return slots.get(var);
     }
@@ -65,10 +67,10 @@ public class CodeGenerator extends Visitor<String> {
         String type = "";
         switch (element){
             case StringType stringType -> type += "Ljava/lang/String;";
-            case IntType intType -> type += "I";
+            case IntType intType -> type += "Ljava/lang/Integer;";
             case FptrType fptrType -> type += "LFptr;";
             case ListType listType -> type += "LList;";
-            case BoolType boolType -> type += "Z";
+            case BoolType boolType -> type += "Ljava/lang/Boolean;";
             case null, default -> {
                 type += "V";
             }
@@ -181,6 +183,7 @@ public class CodeGenerator extends Visitor<String> {
         String name = functionItem.getName();
         //funcsReturnType.put(name, returnType);
         Type returnType = functionItem.getReturnType();
+        returnTypes.put(name, returnType);
         ArrayList<String> argsTypeSign = new ArrayList<String>();
 
         for (Type argType : functionItem.getArgumentTypes()) {
@@ -195,7 +198,7 @@ public class CodeGenerator extends Visitor<String> {
             bodyStmts.add(stmt.accept(this));
 
         StringBuilder commands = new StringBuilder();
-        commands.append(".method public static ");
+        commands.append(".method public ");
 
         commands.append(name).append('(');
         for (String arg : argsTypeSign)
@@ -246,19 +249,69 @@ public class CodeGenerator extends Visitor<String> {
         addCommand(commands);
         return null;
     }
-    public String visit(AccessExpression accessExpression){
-        return "";
-        /*if (accessExpression.isFunctionCall()) {
+            public String visit(AccessExpression accessExpression){
+        var commands = new ArrayList<String>();
+        if (accessExpression.isFunctionCall()) {
+
             Identifier functionName = (Identifier)accessExpression.getAccessedExpression();
-            String args = ""; // TODO
-            String returnType = ""; // TODO
-            return "invokestatic Main/" + functionName.getName() + args + returnType + "\n";
-        }
+            if (!this.visited.contains(functionName.getName())) {
+                commands.add("aload " + slotOf(functionName.getName()));
+            }
+            else {
+                commands.add("new Fptr");
+                commands.add("dup");
+                commands.add("aload_0");
+                commands.add("ldc \"" + functionName.getName() + "\"");
+                commands.add("invokespecial Fptr/<init>(Ljava/lang/Object;Ljava/lang/String;)V");
+            }
+            commands.add("new java/util/ArrayList");
+            commands.add("dup");
+            commands.add("invokespecial java/util/ArrayList/<init>()V");
+            int tempVar = slotOf("");
+            commands.add("astore " + tempVar);
+            for (Expression arg : accessExpression.getArguments()) {
+                commands.add("aload " + tempVar);
+                Type argType = arg.accept(typeChecker);
+
+                if (argType instanceof ListType) {
+                    commands.add("new List");
+                    commands.add("dup");
+                }
+                commands.add(arg.accept(this));
+//                    if (argType instanceof IntType)
+//                        commands.add("invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;");
+//                    else if (argType instanceof BoolType)
+//                        commands.add("invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;");
+                if (argType instanceof ListType) {
+                    commands.add("invokespecial List/<init>(LList;)V");
+                }
+                commands.add("invokevirtual java/util/ArrayList/add(Ljava/lang/Object;)Z");
+                commands.add("pop");
+            }
+            commands.add("aload " + tempVar);
+            commands.add("invokevirtual Fptr/invoke(Ljava/util/ArrayList;)Ljava/lang/Object;");
+            }
+//            else {
+//                String args = "(";
+//                for (var arg : accessExpression.getArguments()) {
+//                    commands.add(arg.accept(this));
+//                    args += getType(arg.accept(typeChecker));
+//                }
+//                args += ")";
+//                String returnType = "";
+//                if (accessExpression.getAccessedExpression() instanceof FunctionPointer) {
+//                    returnType = "Ljava/lang/Object;";
+//                } else {
+//                    returnType = getType(returnTypes.get(functionName.getName()));
+//                }
+//                commands.add("invokestatic Main/" + functionName.getName() + args + returnType);
+//            }
+
         else {
             // TODO
         }
         //TODO
-        return null;*/
+        return String.join("\n", commands);
     }
     @Override
     public String visit(AssignStatement assignStatement){
@@ -271,16 +324,16 @@ public class CodeGenerator extends Visitor<String> {
             stmts.add("aload " + index);
             stmts.add(assignStatement.getAccessListExpression().accept(this));
             stmts.add(assignStatement.getAssignExpression().accept(this));
-            if (typeR instanceof IntType || typeR instanceof BoolType)
-                stmts.add("iastore");
-            else
+//            if (typeR instanceof IntType || typeR instanceof BoolType)
+//                stmts.add("iastore");
+//            else
                 stmts.add("aastore");
         }
         else {
             stmts.add(assignStatement.getAssignExpression().accept(this));
-            if (typeR instanceof IntType || typeR instanceof BoolType)
-                stmts.add("istore " + index);
-            else
+//            if (typeR instanceof IntType || typeR instanceof BoolType)
+//                stmts.add("istore " + index);
+//            else
                 stmts.add("astore " + index);
         }
 
@@ -289,12 +342,15 @@ public class CodeGenerator extends Visitor<String> {
     }
     @Override
     public String visit(IfStatement ifStatement){
+        SymbolTable.push(ifStatement.getSymbolTable());
         ArrayList<String> stmts = new ArrayList<>();
         stmts.add(ifStatement.getConditions().get(0).accept(this));
 
         String thenL = getFreshLabel();
         String elseL = getFreshLabel();
         String exitL = getFreshLabel();
+
+        stmts.add("invokevirtual java/lang/Boolean/booleanValue()Z");
 
         stmts.add("ifeq" + " " + elseL);
         stmts.add(thenL + ":");
@@ -308,6 +364,7 @@ public class CodeGenerator extends Visitor<String> {
                 stmts.add(stmt.accept(this));
 
         stmts.add(exitL + ":");
+        SymbolTable.pop();
         return String.join("\n",stmts);
     }
 
@@ -318,10 +375,17 @@ public class CodeGenerator extends Visitor<String> {
         Type argType = putStatement.getExpression().accept(typeChecker);
         String commandsOfArg = putStatement.getExpression().accept(this);
         stmts.add(commandsOfArg);
-        if (argType instanceof IntType)
+        if (argType instanceof IntType) {
+            stmts.add("checkcast java/lang/Integer");
+            stmts.add("invokevirtual java/lang/Integer/intValue()I");
             stmts.add("invokevirtual java/io/PrintStream/println(I)V");
-        if (argType instanceof BoolType)
+        }
+        if (argType instanceof BoolType) {
+            stmts.add("checkcast java/lang/Boolean");
+            stmts.add("invokevirtual java/lang/Boolean/booleanValue()Z");
             stmts.add("invokevirtual java/io/PrintStream/println(Z)V");
+        }
+
         if (argType instanceof StringType)
             stmts.add("invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V");
         return String.join("\n", stmts);
@@ -335,11 +399,11 @@ public class CodeGenerator extends Visitor<String> {
         }
         Type type = returnStatement.getReturnExp().accept(typeChecker);
         stmts.add(returnStatement.getReturnExp().accept(this));
-        if (type instanceof IntType) {
-            //stmts.add("invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;");
-            stmts.add("ireturn");
-            return String.join("\n", stmts);
-        }
+//        if (type instanceof IntType) {
+//            //stmts.add("invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;");
+//            stmts.add("ireturn");
+//            return String.join("\n", stmts);
+//        }
 //        else if (type instanceof BoolType)
 //            stmts.add("invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;");
         stmts.add("areturn");
@@ -355,21 +419,43 @@ public class CodeGenerator extends Visitor<String> {
     public String visit(BinaryExpression binaryExpression){
         ArrayList<String> stmts = new ArrayList<>();
         stmts.add(binaryExpression.getFirstOperand().accept(this));
+        if (binaryExpression.getFirstOperand().accept(typeChecker) instanceof IntType)
+            stmts.add("invokevirtual java/lang/Integer/intValue()I");
+        else if (binaryExpression.getFirstOperand().accept(typeChecker) instanceof BoolType)
+            stmts.add("invokevirtual java/lang/Boolean/booleanValue()Z");
         stmts.add(binaryExpression.getSecondOperand().accept(this));
+        if (binaryExpression.getSecondOperand().accept(typeChecker) instanceof IntType)
+            stmts.add("invokevirtual java/lang/Integer/intValue()I");
+        else if (binaryExpression.getSecondOperand().accept(typeChecker) instanceof BoolType)
+            stmts.add("invokevirtual java/lang/Boolean/booleanValue()Z");
 
         switch (binaryExpression.getOperator()) {
-            case PLUS -> stmts.add("iadd");
-            case MINUS -> stmts.add("isub");
-            case MULT -> stmts.add("imul");
-            case DIVIDE -> stmts.add("idiv");
+            case PLUS -> {
+                stmts.add("iadd");
+                stmts.add("invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;");
+            }
+            case MINUS -> {
+                stmts.add("isub");
+                stmts.add("invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;");
+            }
+            case MULT -> {
+                stmts.add("imul");
+                stmts.add("invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;");
+            }
+            case DIVIDE -> {
+                stmts.add("idiv");
+                stmts.add("invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;");
+            }
             case EQUAL -> {
                 String L1 = getFreshLabel();
                 String exitL = getFreshLabel();
                 stmts.add("if_icmpeq " + L1);
                 stmts.add("ldc 0");
+                stmts.add("invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;");
                 stmts.add("goto " + exitL);
                 stmts.add(L1 + ":");
                 stmts.add("ldc 1");
+                stmts.add("invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;");
                 stmts.add(exitL + ":");
             }
             case NOT_EQUAL -> {
@@ -377,9 +463,11 @@ public class CodeGenerator extends Visitor<String> {
                 String exitL = getFreshLabel();
                 stmts.add("if_icmpeq " + L1);
                 stmts.add("ldc 1");
+                stmts.add("invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;");
                 stmts.add("goto " + exitL);
                 stmts.add(L1 + ":");
                 stmts.add("ldc 0");
+                stmts.add("invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;");
                 stmts.add(exitL + ":");
             }
             case GREATER_THAN -> {
@@ -387,9 +475,11 @@ public class CodeGenerator extends Visitor<String> {
                 String exitL = getFreshLabel();
                 stmts.add("if_icmpgt " + L1);
                 stmts.add("ldc 0");
+                stmts.add("invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;");
                 stmts.add("goto " + exitL);
                 stmts.add(L1 + ":");
                 stmts.add("ldc 1");
+                stmts.add("invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;");
                 stmts.add(exitL + ":");
             }
             case GREATER_EQUAL_THAN -> {
@@ -397,9 +487,11 @@ public class CodeGenerator extends Visitor<String> {
                 String exitL = getFreshLabel();
                 stmts.add("if_icmpge " + L1);
                 stmts.add("ldc 0");
+                stmts.add("invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;");
                 stmts.add("goto " + exitL);
                 stmts.add(L1 + ":");
                 stmts.add("ldc 1");
+                stmts.add("invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;");
                 stmts.add(exitL + ":");
             }
             case LESS_THAN -> {
@@ -407,9 +499,11 @@ public class CodeGenerator extends Visitor<String> {
                 String exitL = getFreshLabel();
                 stmts.add("if_icmplt " + L1);
                 stmts.add("ldc 0");
+                stmts.add("invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;");
                 stmts.add("goto " + exitL);
                 stmts.add(L1 + ":");
                 stmts.add("ldc 1");
+                stmts.add("invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;");
                 stmts.add(exitL + ":");
             }
             case LESS_EQUAL_THAN -> {
@@ -417,9 +511,11 @@ public class CodeGenerator extends Visitor<String> {
                 String exitL = getFreshLabel();
                 stmts.add("if_icmple " + L1);
                 stmts.add("ldc 0");
+                stmts.add("invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;");
                 stmts.add("goto " + exitL);
                 stmts.add(L1 + ":");
                 stmts.add("ldc 1");
+                stmts.add("invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;");
                 stmts.add(exitL + ":");
             }
             default -> {
@@ -464,8 +560,8 @@ public class CodeGenerator extends Visitor<String> {
         if (fsti == null) {
             Type type = identifier.accept(typeChecker);
             String typeSign = "a";
-            if (type instanceof IntType)
-                typeSign = "i";
+//            if (type instanceof IntType)
+//                typeSign = "i";
             command += typeSign + "load " + slotOf(identifier.getName());
 //            if (type instanceof IntType)
 //                command += "invokevirtual java/lang/Integer/intValue()I";
@@ -480,6 +576,7 @@ public class CodeGenerator extends Visitor<String> {
 
     @Override
     public String visit(LoopDoStatement loopDoStatement){
+        SymbolTable.push(loopDoStatement.getSymbolTable());
         ArrayList<String> stmts = new ArrayList<String>();
 
         String startL = getFreshLabel();
@@ -493,6 +590,7 @@ public class CodeGenerator extends Visitor<String> {
 
         stmts.add("goto " + startL);
         stmts.add(exitL + ":");
+        SymbolTable.pop();
         return String.join("\n",stmts);
     }
     @Override
@@ -518,26 +616,28 @@ public class CodeGenerator extends Visitor<String> {
             stmts.add("invokevirtual java/lang/String/length()I");
         }
         if (type instanceof ListType) {
-            stmts.add("invokevirtual List/size()I");
+            stmts.add("invokevirtual java/util/ArrayList/size()I");
         }
+        stmts.add("invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;");
         return String.join("\n", stmts);
     }
 
     @Override
-    public String visit(ChopStatement chopStatement){
-        //check
+    public String visit(ChopStatement chopStatement) {
         ArrayList<String> stmts = new ArrayList<>();
 
         stmts.add(chopStatement.getChopExpression().accept(this));
+        stmts.add("dup");
         stmts.add("invokevirtual java/lang/String/length()I");
-        stmts.add("ldc -1");
-        stmts.add("iadd");
-        stmts.add(chopStatement.getChopExpression().accept(this));
-        stmts.add("invokevirtual java/lang/StringBuilder/deleteCharAt(I)Ljava/lang/StringBuilder;");
-        stmts.add("invokevirtual java/lang/StringBuilder/toString()Ljava/lang/String;");
+        stmts.add("ldc 1");
+        stmts.add("isub");
+        stmts.add("iconst_0");
+        stmts.add("swap");
+        stmts.add("invokevirtual java/lang/String/substring(II)Ljava/lang/String;");
 
         return String.join("\n", stmts);
     }
+
 
     @Override
     public String visit(FunctionPointer functionPointer){
@@ -566,7 +666,11 @@ public class CodeGenerator extends Visitor<String> {
             stmts.add("aload " + tempvar);
             stmts.add(element.accept(this));
             //cast to Integer
-            stmts.add("invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;");
+            Type type = element.accept(typeChecker);
+//            if (type instanceof IntType)
+//                stmts.add("invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;");
+//            else if (type instanceof BoolType)
+//                stmts.add("invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;");
             stmts.add("invokevirtual java/util/ArrayList/add(Ljava/lang/Object;)Z");
             stmts.add("pop");
         }
@@ -575,14 +679,14 @@ public class CodeGenerator extends Visitor<String> {
     @Override
     public String visit(IntValue intValue){
         //use "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer" to convert to primitive
-        return "ldc " + intValue.getIntVal(); //+ "\n"
-               // + "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;";
+        return "ldc " + intValue.getIntVal() + "\n"
+                + "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;";
     }
     @Override
     public String visit(BoolValue boolValue){
         //use "invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean" to convert to primitive
-        return "ldc " + (boolValue.getBool() ? "1" : "0") ;//+ "\n"
-             //   + "invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;";
+        return "ldc " + (boolValue.getBool() ? "1" : "0") + "\n"
+                + "invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;";
     }
     @Override
     public String visit(StringValue stringValue){

@@ -1,6 +1,7 @@
 package main.ast.nodes.statement;
 
 import main.ast.nodes.expression.Expression;
+import main.symbolTable.SymbolTable;
 import main.visitor.IVisitor;
 
 import java.lang.reflect.Array;
@@ -10,6 +11,16 @@ public class IfStatement extends Statement{
     private ArrayList<Expression> conditions = new ArrayList<>();
     private ArrayList<Statement> thenBody = new ArrayList<>();
     private ArrayList<Statement> elseBody = new ArrayList<>();
+
+    private SymbolTable symbolTable;
+
+    public void setSymbolTable(SymbolTable symbolTable) {
+        this.symbolTable = symbolTable;
+    }
+
+    public SymbolTable getSymbolTable() {
+        return symbolTable;
+    }
 
     public void addCondition(ArrayList<Expression> condition){this.conditions.addAll(condition);}
     public void setThenBody(ArrayList<Statement>thenBody){this.thenBody = thenBody;}

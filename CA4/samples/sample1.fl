@@ -1,16 +1,24 @@
-def calcPow(a, b)
-    sum = 1;
+def foo(a)
     i = 0;
     loop do
-        if(i == b)
+        if (i >= len(a))
             break;
         end
-        sum = sum * a;
-        ++i;
+        j = 0;
+        loop do
+            if (j >= a[i])
+                break;
+            end
+            puts(a[i]);
+            j += 1;
+        end
+        i = i + 1;
     end
-    return sum;
 end
 
 def main()
-    puts(calcPow(3, 5));
+    a = [2, 3, 2, 4];
+    b = method(:foo);
+    b(a);
+    # output should be 2 2 3 3 3 2 2 4 4 4 4
 end

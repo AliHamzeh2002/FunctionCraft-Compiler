@@ -145,6 +145,41 @@ public class CodeGenerator extends Visitor<String> {
         addCommand(commands);
     }
 
+    private String createNewFptr(String name){
+        String commands = "";
+        commands += "new Fptr\n";
+        commands += "dup\n";
+        commands += "aload_0\n";
+        commands += "ldc " + "\"" + name + "\"\n";
+        commands += "invokespecial Fptr/<init>(Ljava/lang/Object;Ljava/lang/String;)V\n";
+        return commands;
+    }
+
+    private String createArray(int tempVar, ArrayList<Expression> elements){
+        ArrayList<String> commands = new ArrayList<>();
+        commands.add("new java/util/ArrayList");
+        commands.add("dup");
+        commands.add("invokespecial java/util/ArrayList/<init>()V");
+        commands.add("astore " + tempVar);
+        for (Expression arg : elements) {
+            commands.add("aload " + tempVar);
+            Type elementType = arg.accept(typeChecker);
+
+            if (elementType instanceof ListType) {
+                commands.add("new List");
+                commands.add("dup");
+            }
+            commands.add(arg.accept(this));
+
+            if (elementType instanceof ListType) {
+                commands.add("invokespecial List/<init>(LList;)V");
+            }
+            commands.add("invokevirtual java/util/ArrayList/add(Ljava/lang/Object;)Z");
+            commands.add("pop");
+        }
+        return String.join("\n", commands);
+    }
+
     @Override
     public String visit(Program program){
         String commands = """
@@ -176,6 +211,7 @@ public class CodeGenerator extends Visitor<String> {
         }
 
 
+        assert functionItem != null;
         String name = functionItem.getName();
         Type returnType = functionItem.getReturnType();
         returnTypes.put(name, returnType);
@@ -218,7 +254,6 @@ public class CodeGenerator extends Visitor<String> {
         for (var comm : commands.toString().split("\n"))
             addCommand(comm);
 
-        addCommand("\n");
         SymbolTable.pop();
         return null;
 }
@@ -252,33 +287,10 @@ public class CodeGenerator extends Visitor<String> {
             if (!this.visited.contains(functionName.getName())) {
                 commands.add("aload " + slotOf(functionName.getName()));
             } else {
-                commands.add("new Fptr");
-                commands.add("dup");
-                commands.add("aload_0");
-                commands.add("ldc \"" + functionName.getName() + "\"");
-                commands.add("invokespecial Fptr/<init>(Ljava/lang/Object;Ljava/lang/String;)V");
+                commands.add(createNewFptr(functionName.getName()));
             }
-            commands.add("new java/util/ArrayList");
-            commands.add("dup");
-            commands.add("invokespecial java/util/ArrayList/<init>()V");
             int tempVar = slotOf(" " + functionName.getName());
-            commands.add("astore " + tempVar);
-            for (Expression arg : accessExpression.getArguments()) {
-                commands.add("aload " + tempVar);
-                Type argType = arg.accept(typeChecker);
-
-                if (argType instanceof ListType) {
-                    commands.add("new List");
-                    commands.add("dup");
-                }
-                commands.add(arg.accept(this));
-
-                if (argType instanceof ListType) {
-                    commands.add("invokespecial List/<init>(LList;)V");
-                }
-                commands.add("invokevirtual java/util/ArrayList/add(Ljava/lang/Object;)Z");
-                commands.add("pop");
-            }
+            commands.add(createArray(tempVar, accessExpression.getArguments()));
             commands.add("aload " + tempVar);
             commands.add("invokevirtual Fptr/invoke(Ljava/util/ArrayList;)Ljava/lang/Object;");
         }
@@ -572,12 +584,19 @@ public class CodeGenerator extends Visitor<String> {
                 stmts.add("ixor");
             }
             case INC -> {
+//                AssignStatement assignStatement = new AssignStatement(unaryExpression.getExpression(),
+//                        new BinaryExpression(unaryExpression.getExpression(), new IntValue(1), BinaryOperator.PLUS),
+//                        AssignOperator.ASSIGN);
+//                stmts.add(assignStatement.accept(this));
                 stmts.add("ldc 1");
                 stmts.add("iadd");
                 stmts.add("invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;");
                 stmts.add("astore " + slotOf(((Identifier)unaryExpression.getExpression()).getName()));
             }
             case DEC -> {
+//                AssignStatement assignStatement = new AssignStatement(unaryExpression.getExpression(),
+//                        new BinaryExpression(unaryExpression.getExpression(), new IntValue(1), BinaryOperator.MINUS),
+//                        AssignOperator.ASSIGN);
                 stmts.add("ldc -1");
                 stmts.add("iadd");
                 stmts.add("invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;");
@@ -611,8 +630,7 @@ public class CodeGenerator extends Visitor<String> {
             if (type instanceof BoolType)
                 command += "checkcast java/lang/Boolean";
         } else {
-            command += "new Fptr\n" + "dup\n" + "aload_0\n" + "ldc \"" + identifier.getName() + "\"\n" +
-                    "invokespecial Fptr/<init>(Ljava/lang/Object;Ljava/lang/String;)V\n";
+            command += createNewFptr(identifier.getName());
         }
         return command;
     }
@@ -685,33 +703,18 @@ public class CodeGenerator extends Visitor<String> {
     @Override
     public String visit(FunctionPointer functionPointer){
         FptrType fptr = (FptrType) functionPointer.accept(typeChecker);
-        String commands = "";
-        commands += "new Fptr\n";
-        commands += "dup\n";
-        commands += "aload_0\n";
-        commands += "ldc " + "\"" + fptr.getFunctionName() + "\"\n";
-        commands += "invokespecial Fptr/<init>(Ljava/lang/Object;Ljava/lang/String;)V\n";
-        return commands;
+        return createNewFptr(fptr.getFunctionName());
     }
     @Override
     public String visit(ListValue listValue){
         ArrayList<String> stmts = new ArrayList<>();
-        stmts.add("new java/util/ArrayList");
-        stmts.add("dup");
-        stmts.add("invokespecial java/util/ArrayList/<init>()V");
         int tempvar = slotOf(" " + listValue.hashCode());
-        stmts.add("astore " + tempvar);
-        for (Expression element : listValue.getElements()) {
-            stmts.add("aload " + tempvar);
-            stmts.add(element.accept(this));
-            Type type = element.accept(typeChecker);
-            stmts.add("invokevirtual java/util/ArrayList/add(Ljava/lang/Object;)Z");
-            stmts.add("pop");
-        }
+        stmts.add(createArray(tempvar, listValue.getElements()));
         stmts.add("new List");
         stmts.add("dup");
         stmts.add("aload " + tempvar);
         stmts.add("invokespecial List/<init>(Ljava/util/ArrayList;)V");
+
         return String.join("\n", stmts);
     }
     @Override

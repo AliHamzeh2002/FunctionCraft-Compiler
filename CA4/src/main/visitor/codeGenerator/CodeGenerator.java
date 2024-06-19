@@ -434,19 +434,24 @@ public class CodeGenerator extends Visitor<String> {
     }
 
     @Override
-    public String visit(BinaryExpression binaryExpression){
+    public String visit(BinaryExpression binaryExpression) {
         ArrayList<String> stmts = new ArrayList<>();
-        stmts.add(binaryExpression.getFirstOperand().accept(this));
-        if (binaryExpression.getFirstOperand().accept(typeChecker) instanceof IntType)
-            stmts.add("invokevirtual java/lang/Integer/intValue()I");
-        else if (binaryExpression.getFirstOperand().accept(typeChecker) instanceof BoolType)
-            stmts.add("invokevirtual java/lang/Boolean/booleanValue()Z");
-        stmts.add(binaryExpression.getSecondOperand().accept(this));
-        if (binaryExpression.getSecondOperand().accept(typeChecker) instanceof IntType)
-            stmts.add("invokevirtual java/lang/Integer/intValue()I");
-        else if (binaryExpression.getSecondOperand().accept(typeChecker) instanceof BoolType)
-            stmts.add("invokevirtual java/lang/Boolean/booleanValue()Z");
+        handleOperand(stmts, binaryExpression.getFirstOperand());
+        handleOperand(stmts, binaryExpression.getSecondOperand());
+        handleOperator(stmts, binaryExpression);
+        return String.join("\n", stmts);
+    }
 
+    private void handleOperand(ArrayList<String> stmts, Expression operand) {
+        stmts.add(operand.accept(this));
+        if (operand.accept(typeChecker) instanceof IntType) {
+            stmts.add("invokevirtual java/lang/Integer/intValue()I");
+        } else if (operand.accept(typeChecker) instanceof BoolType) {
+            stmts.add("invokevirtual java/lang/Boolean/booleanValue()Z");
+        }
+    }
+
+    private void handleOperator(ArrayList<String> stmts, BinaryExpression binaryExpression) {
         switch (binaryExpression.getOperator()) {
             case PLUS -> {
                 stmts.add("iadd");
@@ -464,83 +469,29 @@ public class CodeGenerator extends Visitor<String> {
                 stmts.add("idiv");
                 stmts.add("invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;");
             }
-            case EQUAL -> {
-                String L1 = getFreshLabel();
-                String exitL = getFreshLabel();
-                stmts.add("if_icmpeq " + L1);
-                stmts.add("ldc 0");
-                stmts.add("invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;");
-                stmts.add("goto " + exitL);
-                stmts.add(L1 + ":");
-                stmts.add("ldc 1");
-                stmts.add("invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;");
-                stmts.add(exitL + ":");
-            }
-            case NOT_EQUAL -> {
-                String L1 = getFreshLabel();
-                String exitL = getFreshLabel();
-                stmts.add("if_icmpeq " + L1);
-                stmts.add("ldc 1");
-                stmts.add("invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;");
-                stmts.add("goto " + exitL);
-                stmts.add(L1 + ":");
-                stmts.add("ldc 0");
-                stmts.add("invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;");
-                stmts.add(exitL + ":");
-            }
-            case GREATER_THAN -> {
-                String L1 = getFreshLabel();
-                String exitL = getFreshLabel();
-                stmts.add("if_icmpgt " + L1);
-                stmts.add("ldc 0");
-                stmts.add("invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;");
-                stmts.add("goto " + exitL);
-                stmts.add(L1 + ":");
-                stmts.add("ldc 1");
-                stmts.add("invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;");
-                stmts.add(exitL + ":");
-            }
-            case GREATER_EQUAL_THAN -> {
-                String L1 = getFreshLabel();
-                String exitL = getFreshLabel();
-                stmts.add("if_icmpge " + L1);
-                stmts.add("ldc 0");
-                stmts.add("invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;");
-                stmts.add("goto " + exitL);
-                stmts.add(L1 + ":");
-                stmts.add("ldc 1");
-                stmts.add("invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;");
-                stmts.add(exitL + ":");
-            }
-            case LESS_THAN -> {
-                String L1 = getFreshLabel();
-                String exitL = getFreshLabel();
-                stmts.add("if_icmplt " + L1);
-                stmts.add("ldc 0");
-                stmts.add("invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;");
-                stmts.add("goto " + exitL);
-                stmts.add(L1 + ":");
-                stmts.add("ldc 1");
-                stmts.add("invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;");
-                stmts.add(exitL + ":");
-            }
-            case LESS_EQUAL_THAN -> {
-                String L1 = getFreshLabel();
-                String exitL = getFreshLabel();
-                stmts.add("if_icmple " + L1);
-                stmts.add("ldc 0");
-                stmts.add("invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;");
-                stmts.add("goto " + exitL);
-                stmts.add(L1 + ":");
-                stmts.add("ldc 1");
-                stmts.add("invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;");
-                stmts.add(exitL + ":");
-            }
-            default -> {
-            }
+            case EQUAL -> handleComparisonOperator(stmts, "if_icmpeq");
+            case NOT_EQUAL -> handleComparisonOperator(stmts, "if_icmpne");
+            case GREATER_THAN -> handleComparisonOperator(stmts, "if_icmpgt");
+            case GREATER_EQUAL_THAN -> handleComparisonOperator(stmts, "if_icmpge");
+            case LESS_THAN -> handleComparisonOperator(stmts, "if_icmplt");
+            case LESS_EQUAL_THAN -> handleComparisonOperator(stmts, "if_icmple");
+            default -> {}
         }
-        return String.join("\n", stmts);
     }
+
+    private void handleComparisonOperator(ArrayList<String> stmts, String jumpInstruction) {
+        String L1 = getFreshLabel();
+        String exitL = getFreshLabel();
+        stmts.add(jumpInstruction + " " + L1);
+        stmts.add("ldc 0");
+        stmts.add("invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;");
+        stmts.add("goto " + exitL);
+        stmts.add(L1 + ":");
+        stmts.add("ldc 1");
+        stmts.add("invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;");
+        stmts.add(exitL + ":");
+    }
+
 
     @Override
     public String visit(UnaryExpression unaryExpression){

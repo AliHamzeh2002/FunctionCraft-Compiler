@@ -1,26 +1,16 @@
-def start(a, b)
-    if ((!(a)) || (b > 100))
-        if (a)
-            puts(b / 30);
-        else
-            puts(b * 30);
+def calcPow(a, b)
+    sum = 1;
+    i = 0;
+    loop do
+        if(i == b)
+            break;
         end
+        sum = sum * a;
+        ++i;
     end
-    itList();
-end
-
-def itList()
-    printRecursive(["ata", "souri", "javad", "nemati", "darabi"], 0);
-end
-
-def printRecursive(myList, j)
-    if (j == 5)
-        return;
-    end
-    puts(myList[j]);
-    printRecursive(myList, j + 1);
+    return sum;
 end
 
 def main()
-    start(true, 300);
+    puts(calcPow(3, 5));
 end

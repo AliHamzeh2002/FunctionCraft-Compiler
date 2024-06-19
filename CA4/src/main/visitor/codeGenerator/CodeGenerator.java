@@ -349,8 +349,11 @@ public class CodeGenerator extends Visitor<String> {
                 binaryExpression = createBinaryExpression(assignStatement, BinaryOperator.MULT, isList);
             } else if (assignStatement.getAssignOperator() == AssignOperator.DIVIDE_ASSIGN) {
                 binaryExpression = createBinaryExpression(assignStatement, BinaryOperator.DIVIDE, isList);
+            } else if (assignStatement.getAssignOperator() == AssignOperator.MOD_ASSIGN) {
+                binaryExpression = createBinaryExpression(assignStatement, BinaryOperator.MOD, isList);
             }
-            stmts.add(binaryExpression.accept(this));
+
+        stmts.add(binaryExpression.accept(this));
         } else {
             stmts.add(assignStatement.getAssignExpression().accept(this));
         }
@@ -473,6 +476,10 @@ public class CodeGenerator extends Visitor<String> {
                 stmts.add("idiv");
                 stmts.add("invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;");
             }
+            case MOD ->{
+                stmts.add("irem");
+                stmts.add("invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;");
+            }
             case EQUAL -> handleComparisonOperator(stmts, "if_icmpeq");
             case NOT_EQUAL -> handleComparisonOperator(stmts, "if_icmpne");
             case GREATER_THAN -> handleComparisonOperator(stmts, "if_icmpgt");
@@ -510,19 +517,12 @@ public class CodeGenerator extends Visitor<String> {
                 stmts.add("ixor");
             }
             case INC -> {
-//                AssignStatement assignStatement = new AssignStatement(unaryExpression.getExpression(),
-//                        new BinaryExpression(unaryExpression.getExpression(), new IntValue(1), BinaryOperator.PLUS),
-//                        AssignOperator.ASSIGN);
-//                stmts.add(assignStatement.accept(this));
                 stmts.add("ldc 1");
                 stmts.add("iadd");
                 stmts.add("invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;");
                 stmts.add("astore " + slotOf(((Identifier)unaryExpression.getExpression()).getName()));
             }
             case DEC -> {
-//                AssignStatement assignStatement = new AssignStatement(unaryExpression.getExpression(),
-//                        new BinaryExpression(unaryExpression.getExpression(), new IntValue(1), BinaryOperator.MINUS),
-//                        AssignOperator.ASSIGN);
                 stmts.add("ldc -1");
                 stmts.add("iadd");
                 stmts.add("invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;");

@@ -7,167 +7,163 @@
 		invokespecial Main/<init>()V
 		return
 		.end method
-.method public f()V
+.method public start(Ljava/lang/Boolean;Ljava/lang/Integer;)V
 .limit stack 128
 .limit locals 128
-		getstatic java/lang/System/out Ljava/io/PrintStream;
-		ldc "1"
-		checkcast java/lang/String
-		invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V
-		return
-.end method
-.method public foo(LList;)V
-.limit stack 128
-.limit locals 128
-		ldc 0
-		invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;
-		astore 2
+		aload 1
+		checkcast java/lang/Boolean
+		invokevirtual java/lang/Boolean/booleanValue()Z
+		ldc 1
+		ixor
+		invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;
+		invokevirtual java/lang/Boolean/booleanValue()Z
+		ifeq Label_1
 	Label_0:
-		aload 2
-		checkcast java/lang/Integer
-		invokevirtual java/lang/Integer/intValue()I
 		aload 1
-		checkcast List
-		invokevirtual List/getSize()I
-		invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;
-		invokevirtual java/lang/Integer/intValue()I
-		if_icmpge Label_2
-		ldc 0
-		invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;
-		goto Label_3
-	Label_2:
-		ldc 1
-		invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;
+		checkcast java/lang/Boolean
+		invokevirtual java/lang/Boolean/booleanValue()Z
+		ifeq Label_4
 	Label_3:
-		invokevirtual java/lang/Boolean/booleanValue()Z
-		ifeq Label_5
-	Label_4:
-		goto Label_1
-		goto Label_6
-	Label_5:
-	Label_6:
-		ldc 0
-		invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;
-		astore 3
-	Label_7:
-		aload 3
-		checkcast java/lang/Integer
-		invokevirtual java/lang/Integer/intValue()I
-		aload 1
-		checkcast List
-		aload 2
-		checkcast java/lang/Integer
-		invokevirtual java/lang/Integer/intValue()I
-		invokevirtual List/getElement(I)Ljava/lang/Object;
-		checkcast java/lang/Integer
-		invokevirtual java/lang/Integer/intValue()I
-		if_icmpge Label_9
-		ldc 0
-		invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;
-		goto Label_10
-	Label_9:
-		ldc 1
-		invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;
-	Label_10:
-		invokevirtual java/lang/Boolean/booleanValue()Z
-		ifeq Label_12
-	Label_11:
-		goto Label_8
-		goto Label_13
-	Label_12:
-	Label_13:
 		getstatic java/lang/System/out Ljava/io/PrintStream;
-		aload 1
-		checkcast List
 		aload 2
 		checkcast java/lang/Integer
 		invokevirtual java/lang/Integer/intValue()I
-		invokevirtual List/getElement(I)Ljava/lang/Object;
-		checkcast java/lang/Integer
+		ldc 30
+		invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;
+		invokevirtual java/lang/Integer/intValue()I
+		idiv
+		invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;
 		checkcast java/lang/Integer
 		invokevirtual java/lang/Integer/intValue()I
 		invokevirtual java/io/PrintStream/println(I)V
-		aload 3
-		checkcast java/lang/Integer
-		invokevirtual java/lang/Integer/intValue()I
-		ldc 1
-		invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;
-		invokevirtual java/lang/Integer/intValue()I
-		iadd
-		invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;
-		astore 3
-		goto Label_7
-	Label_8:
+		goto Label_5
+	Label_4:
+		getstatic java/lang/System/out Ljava/io/PrintStream;
 		aload 2
 		checkcast java/lang/Integer
 		invokevirtual java/lang/Integer/intValue()I
-		ldc 1
+		ldc 30
 		invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;
 		invokevirtual java/lang/Integer/intValue()I
-		iadd
+		imul
 		invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;
-		astore 2
-		goto Label_0
+		checkcast java/lang/Integer
+		invokevirtual java/lang/Integer/intValue()I
+		invokevirtual java/io/PrintStream/println(I)V
+	Label_5:
+		goto Label_2
 	Label_1:
+	Label_2:
+		new Fptr
+		dup
+		aload_0
+		ldc "itList"
+		invokespecial Fptr/<init>(Ljava/lang/Object;Ljava/lang/String;)V
+		
+		new java/util/ArrayList
+		dup
+		invokespecial java/util/ArrayList/<init>()V
+		astore 3
+		aload 3
+		invokevirtual Fptr/invoke(Ljava/util/ArrayList;)Ljava/lang/Object;
+		pop
 		return
 .end method
-.method public <init>()V
-		.limit stack 128
-		.limit locals 128
+.method public itList()V
+.limit stack 128
+.limit locals 128
+		new Fptr
+		dup
 		aload_0
-		invokespecial java/lang/Object/<init>()V
+		ldc "printRecursive"
+		invokespecial Fptr/<init>(Ljava/lang/Object;Ljava/lang/String;)V
+		
+		new java/util/ArrayList
+		dup
+		invokespecial java/util/ArrayList/<init>()V
+		astore 1
+		aload 1
+		new List
+		dup
 		new java/util/ArrayList
 		dup
 		invokespecial java/util/ArrayList/<init>()V
 		astore 2
 		aload 2
-		ldc 2
-		invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;
+		ldc "ata"
 		invokevirtual java/util/ArrayList/add(Ljava/lang/Object;)Z
 		pop
 		aload 2
-		ldc 3
-		invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;
+		ldc "souri"
 		invokevirtual java/util/ArrayList/add(Ljava/lang/Object;)Z
 		pop
 		aload 2
-		ldc 2
-		invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;
+		ldc "javad"
 		invokevirtual java/util/ArrayList/add(Ljava/lang/Object;)Z
 		pop
 		aload 2
-		ldc 4
-		invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;
+		ldc "nemati"
+		invokevirtual java/util/ArrayList/add(Ljava/lang/Object;)Z
+		pop
+		aload 2
+		ldc "darabi"
 		invokevirtual java/util/ArrayList/add(Ljava/lang/Object;)Z
 		pop
 		new List
 		dup
 		aload 2
 		invokespecial List/<init>(Ljava/util/ArrayList;)V
-		astore 1
+		invokespecial List/<init>(LList;)V
+		invokevirtual java/util/ArrayList/add(Ljava/lang/Object;)Z
+		pop
 		aload 1
-		checkcast List
-		invokevirtual List/getSize()I
+		ldc 0
+		invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;
+		invokevirtual java/util/ArrayList/add(Ljava/lang/Object;)Z
+		pop
+		aload 1
+		invokevirtual Fptr/invoke(Ljava/util/ArrayList;)Ljava/lang/Object;
+		pop
+		return
+.end method
+.method public printRecursive(LList;Ljava/lang/Integer;)V
+.limit stack 128
+.limit locals 128
+		aload 2
+		checkcast java/lang/Integer
+		invokevirtual java/lang/Integer/intValue()I
+		ldc 5
 		invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;
 		invokevirtual java/lang/Integer/intValue()I
-		ldc 2
-		invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;
-		invokevirtual java/lang/Integer/intValue()I
-		if_icmplt Label_14
+		if_icmpeq Label_6
 		ldc 0
 		invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;
-		goto Label_15
-		Label_14:
+		goto Label_7
+	Label_6:
 		ldc 1
 		invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;
-		Label_15:
+	Label_7:
 		invokevirtual java/lang/Boolean/booleanValue()Z
-		ifeq Label_17
-		Label_16:
+		ifeq Label_9
+	Label_8:
+		return
+		goto Label_10
+	Label_9:
+	Label_10:
+		getstatic java/lang/System/out Ljava/io/PrintStream;
+		aload 1
+		checkcast List
+		aload 2
+		checkcast java/lang/Integer
+		invokevirtual java/lang/Integer/intValue()I
+		invokevirtual List/getElement(I)Ljava/lang/Object;
+		checkcast java/lang/String
+		checkcast java/lang/String
+		invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V
 		new Fptr
 		dup
 		aload_0
-		ldc "foo"
+		ldc "printRecursive"
 		invokespecial Fptr/<init>(Ljava/lang/Object;Ljava/lang/String;)V
 		
 		new java/util/ArrayList
@@ -183,23 +179,48 @@
 		invokevirtual java/util/ArrayList/add(Ljava/lang/Object;)Z
 		pop
 		aload 3
+		aload 2
+		checkcast java/lang/Integer
+		invokevirtual java/lang/Integer/intValue()I
+		ldc 1
+		invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;
+		invokevirtual java/lang/Integer/intValue()I
+		iadd
+		invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;
+		invokevirtual java/util/ArrayList/add(Ljava/lang/Object;)Z
+		pop
+		aload 3
 		invokevirtual Fptr/invoke(Ljava/util/ArrayList;)Ljava/lang/Object;
 		pop
-		goto Label_18
-		Label_17:
+		return
+.end method
+.method public <init>()V
+		.limit stack 128
+		.limit locals 128
+		aload_0
+		invokespecial java/lang/Object/<init>()V
 		new Fptr
 		dup
 		aload_0
-		ldc "f"
+		ldc "start"
 		invokespecial Fptr/<init>(Ljava/lang/Object;Ljava/lang/String;)V
 		
 		new java/util/ArrayList
 		dup
 		invokespecial java/util/ArrayList/<init>()V
-		astore 4
-		aload 4
+		astore 1
+		aload 1
+		ldc 1
+		invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;
+		invokevirtual java/util/ArrayList/add(Ljava/lang/Object;)Z
+		pop
+		aload 1
+		ldc 300
+		invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;
+		invokevirtual java/util/ArrayList/add(Ljava/lang/Object;)Z
+		pop
+		aload 1
 		invokevirtual Fptr/invoke(Ljava/util/ArrayList;)Ljava/lang/Object;
 		pop
-		Label_18:
 		return
 		.end method

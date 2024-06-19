@@ -315,9 +315,8 @@ public class CodeGenerator extends Visitor<String> {
         return String.join("\n", commands);
     }
     @Override
-    public String visit(AssignStatement assignStatement){
+    public String visit(AssignStatement assignStatement) {
         ArrayList<String> stmts = new ArrayList<>();
-        Type typeR = assignStatement.getAssignExpression().accept(typeChecker);
 
         int index = slotOf(assignStatement.getAssignedId().getName());
         if (assignStatement.isAccessList()) {
@@ -325,65 +324,46 @@ public class CodeGenerator extends Visitor<String> {
             stmts.add("checkcast List");
             stmts.add(assignStatement.getAccessListExpression().accept(this));
             stmts.add("invokevirtual java/lang/Integer/intValue()I");
-            if (assignStatement.getAssignOperator() != AssignOperator.ASSIGN){
-                if (assignStatement.getAssignOperator() == AssignOperator.PLUS_ASSIGN){
-                    BinaryExpression binaryExpression = new BinaryExpression(new AccessExpression(assignStatement.getAssignedId(), assignStatement.getAccessListExpression()),
-                            assignStatement.getAssignExpression(), BinaryOperator.PLUS);
-                    stmts.add(binaryExpression.accept(this));
-                }
-                if (assignStatement.getAssignOperator() == AssignOperator.MINUS_ASSIGN){
-                    BinaryExpression binaryExpression = new BinaryExpression(assignStatement.getAssignedId(),
-                            assignStatement.getAssignExpression(), BinaryOperator.MINUS);
-                    stmts.add(binaryExpression.accept(this));
-                }
-                if (assignStatement.getAssignOperator() == AssignOperator.MULT_ASSIGN){
-                    BinaryExpression binaryExpression = new BinaryExpression(assignStatement.getAssignedId(),
-                            assignStatement.getAssignExpression(), BinaryOperator.MULT);
-                    stmts.add(binaryExpression.accept(this));
-                }
-                if (assignStatement.getAssignOperator() == AssignOperator.DIVIDE_ASSIGN){
-                    BinaryExpression binaryExpression = new BinaryExpression(new AccessExpression(assignStatement.getAssignedId(), assignStatement.getAccessListExpression()),
-                            assignStatement.getAssignExpression(), BinaryOperator.DIVIDE);
-                    stmts.add(binaryExpression.accept(this));
-                }
-            }
-            else
-                stmts.add(assignStatement.getAssignExpression().accept(this));
-
+            handleAssignOperator(stmts, assignStatement, true);
             stmts.add("invokevirtual List/setElement(ILjava/lang/Object;)V");
-
-        }
-        else {
-            if (assignStatement.getAssignOperator() != AssignOperator.ASSIGN){
-                if (assignStatement.getAssignOperator() == AssignOperator.PLUS_ASSIGN){
-                    BinaryExpression binaryExpression = new BinaryExpression(assignStatement.getAssignedId(),
-                            assignStatement.getAssignExpression(), BinaryOperator.PLUS);
-                    stmts.add(binaryExpression.accept(this));
-                }
-                if (assignStatement.getAssignOperator() == AssignOperator.MINUS_ASSIGN){
-                    BinaryExpression binaryExpression = new BinaryExpression(assignStatement.getAssignedId(),
-                            assignStatement.getAssignExpression(), BinaryOperator.MINUS);
-                    stmts.add(binaryExpression.accept(this));
-                }
-                if (assignStatement.getAssignOperator() == AssignOperator.MULT_ASSIGN){
-                    BinaryExpression binaryExpression = new BinaryExpression(assignStatement.getAssignedId(),
-                            assignStatement.getAssignExpression(), BinaryOperator.MULT);
-                    stmts.add(binaryExpression.accept(this));
-                }
-                if (assignStatement.getAssignOperator() == AssignOperator.DIVIDE_ASSIGN){
-                    BinaryExpression binaryExpression = new BinaryExpression(assignStatement.getAssignedId(),
-                            assignStatement.getAssignExpression(), BinaryOperator.DIVIDE);
-                    stmts.add(binaryExpression.accept(this));
-                }
-            }
-            else
-                stmts.add(assignStatement.getAssignExpression().accept(this));
-
+        } else {
+            handleAssignOperator(stmts, assignStatement, false);
             stmts.add("astore " + index);
         }
 
-        return String.join("\n",stmts);
+        return String.join("\n", stmts);
     }
+
+    private void handleAssignOperator(ArrayList<String> stmts, AssignStatement assignStatement, boolean isList) {
+        if (assignStatement.getAssignOperator() != AssignOperator.ASSIGN) {
+            BinaryExpression binaryExpression = null;
+            if (assignStatement.getAssignOperator() == AssignOperator.PLUS_ASSIGN) {
+                binaryExpression = createBinaryExpression(assignStatement, BinaryOperator.PLUS, isList);
+            } else if (assignStatement.getAssignOperator() == AssignOperator.MINUS_ASSIGN) {
+                binaryExpression = createBinaryExpression(assignStatement, BinaryOperator.MINUS, isList);
+            } else if (assignStatement.getAssignOperator() == AssignOperator.MULT_ASSIGN) {
+                binaryExpression = createBinaryExpression(assignStatement, BinaryOperator.MULT, isList);
+            } else if (assignStatement.getAssignOperator() == AssignOperator.DIVIDE_ASSIGN) {
+                binaryExpression = createBinaryExpression(assignStatement, BinaryOperator.DIVIDE, isList);
+            }
+            stmts.add(binaryExpression.accept(this));
+        } else {
+            stmts.add(assignStatement.getAssignExpression().accept(this));
+        }
+    }
+
+    private BinaryExpression createBinaryExpression(AssignStatement assignStatement, BinaryOperator operator, boolean isList) {
+        if (isList) {
+            return new BinaryExpression(
+                    new AccessExpression(assignStatement.getAssignedId(), assignStatement.getAccessListExpression()),
+                    assignStatement.getAssignExpression(),
+                    operator
+            );
+        } else {
+            return new BinaryExpression(assignStatement.getAssignedId(), assignStatement.getAssignExpression(), operator);
+        }
+    }
+
     @Override
     public String visit(IfStatement ifStatement){
         SymbolTable.push(ifStatement.getSymbolTable());
@@ -442,7 +422,6 @@ public class CodeGenerator extends Visitor<String> {
         if (!returnStatement.hasRetExpression()) {
             return "return";
         }
-        Type type = returnStatement.getReturnExp().accept(typeChecker);
         stmts.add(returnStatement.getReturnExp().accept(this));
 
         stmts.add("areturn");

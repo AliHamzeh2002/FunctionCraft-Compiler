@@ -1,33 +1,26 @@
-def foo(a)
-    i = 0;
-    loop do
-        if (i >= len(a))
-            break;
+def start(a, b)
+    if ((!(a)) || (b > 100))
+        if (a)
+            puts(b / 30);
+        else
+            puts(b * 30);
         end
-        j = 0;
-        loop do
-            if (j >= a[i])
-                break;
-            end
-            puts(a[i]);
-            j += 1;
-        end
-        i = i + 1;
     end
+    itList();
 end
 
-def f()
-    puts("1");
+def itList()
+    printRecursive(["ata", "souri", "javad", "nemati", "darabi"], 0);
+end
+
+def printRecursive(myList, j)
+    if (j == 5)
+        return;
+    end
+    puts(myList[j]);
+    printRecursive(myList, j + 1);
 end
 
 def main()
-    a = [2, 3, 2, 4];
-    #b = method(:foo);
-    if (len(a) < 2)
-        foo(a);
-    else
-        f();
-    end
-
-    # output should be 2 2 3 3 3 2 2 4 4 4 4
+    start(true, 300);
 end

@@ -200,18 +200,22 @@ public class CodeGenerator extends Visitor<String> {
         program.getMain().accept(this);
         return null;
     }
-    @Override
-    public String visit(FunctionDeclaration functionDeclaration){
-        slots.clear();
+
+    private FunctionItem getFunctionItem(FunctionDeclaration functionDeclaration) {
         FunctionItem functionItem = null;
         try {
             functionItem = (FunctionItem) SymbolTable.root.getItem(FunctionItem.START_KEY + functionDeclaration.getFunctionName().getName());
             SymbolTable.push(functionItem.getFunctionSymbolTable());
-        } catch (ItemNotFound e) {
+        } catch (ItemNotFound ignored) {
         }
+        return functionItem;
+    }
 
+    @Override
+    public String visit(FunctionDeclaration functionDeclaration){
+        slots.clear();
+        FunctionItem functionItem = getFunctionItem(functionDeclaration);
 
-        assert functionItem != null;
         String name = functionItem.getName();
         Type returnType = functionItem.getReturnType();
         returnTypes.put(name, returnType);
@@ -496,12 +500,7 @@ public class CodeGenerator extends Visitor<String> {
     @Override
     public String visit(UnaryExpression unaryExpression){
         ArrayList<String> stmts = new ArrayList<>();
-        stmts.add(unaryExpression.getExpression().accept(this));
-        Type type = unaryExpression.getExpression().accept(typeChecker);
-        if (type instanceof IntType)
-            stmts.add("invokevirtual java/lang/Integer/intValue()I");
-        else if (type instanceof BoolType)
-            stmts.add("invokevirtual java/lang/Boolean/booleanValue()Z");
+        handleOperand(stmts, unaryExpression.getExpression());
         switch (unaryExpression.getOperator()) {
             case MINUS -> {
                 stmts.add("ineg");
@@ -530,6 +529,7 @@ public class CodeGenerator extends Visitor<String> {
                 stmts.add("astore " + slotOf(((Identifier)unaryExpression.getExpression()).getName()));
             }
         }
+        Type type = unaryExpression.getExpression().accept(typeChecker);
         if (type instanceof BoolType)
             stmts.add("invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;");
         return String.join("\n", stmts);

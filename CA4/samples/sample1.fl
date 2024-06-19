@@ -16,9 +16,18 @@ def foo(a)
     end
 end
 
+def f()
+    puts("1");
+end
+
 def main()
     a = [2, 3, 2, 4];
-    b = method(:foo);
-    b(a);
+    #b = method(:foo);
+    if (len(a) < 2)
+        foo(a);
+    else
+        f();
+    end
+
     # output should be 2 2 3 3 3 2 2 4 4 4 4
 end

@@ -7,6 +7,15 @@
 		invokespecial Main/<init>()V
 		return
 		.end method
+.method public f()V
+.limit stack 128
+.limit locals 128
+		getstatic java/lang/System/out Ljava/io/PrintStream;
+		ldc "1"
+		checkcast java/lang/String
+		invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V
+		return
+.end method
 .method public foo(LList;)V
 .limit stack 128
 .limit locals 128
@@ -136,19 +145,36 @@
 		aload 2
 		invokespecial List/<init>(Ljava/util/ArrayList;)V
 		astore 1
+		aload 1
+		checkcast List
+		invokevirtual List/getSize()I
+		invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;
+		invokevirtual java/lang/Integer/intValue()I
+		ldc 2
+		invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;
+		invokevirtual java/lang/Integer/intValue()I
+		if_icmplt Label_14
+		ldc 0
+		invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;
+		goto Label_15
+		Label_14:
+		ldc 1
+		invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;
+		Label_15:
+		invokevirtual java/lang/Boolean/booleanValue()Z
+		ifeq Label_17
+		Label_16:
 		new Fptr
 		dup
 		aload_0
 		ldc "foo"
 		invokespecial Fptr/<init>(Ljava/lang/Object;Ljava/lang/String;)V
 		
-		astore 3
-		aload 3
 		new java/util/ArrayList
 		dup
 		invokespecial java/util/ArrayList/<init>()V
-		astore 4
-		aload 4
+		astore 3
+		aload 3
 		new List
 		dup
 		aload 1
@@ -156,7 +182,24 @@
 		invokespecial List/<init>(LList;)V
 		invokevirtual java/util/ArrayList/add(Ljava/lang/Object;)Z
 		pop
+		aload 3
+		invokevirtual Fptr/invoke(Ljava/util/ArrayList;)Ljava/lang/Object;
+		pop
+		goto Label_18
+		Label_17:
+		new Fptr
+		dup
+		aload_0
+		ldc "f"
+		invokespecial Fptr/<init>(Ljava/lang/Object;Ljava/lang/String;)V
+		
+		new java/util/ArrayList
+		dup
+		invokespecial java/util/ArrayList/<init>()V
+		astore 4
 		aload 4
 		invokevirtual Fptr/invoke(Ljava/util/ArrayList;)Ljava/lang/Object;
+		pop
+		Label_18:
 		return
 		.end method

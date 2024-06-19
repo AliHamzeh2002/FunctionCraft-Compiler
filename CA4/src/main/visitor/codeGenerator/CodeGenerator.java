@@ -282,7 +282,6 @@ public class CodeGenerator extends Visitor<String> {
     public String visit(AccessExpression accessExpression){
         var commands = new ArrayList<String>();
         if (accessExpression.isFunctionCall()) {
-
             Identifier functionName = (Identifier) accessExpression.getAccessedExpression();
             if (!this.visited.contains(functionName.getName())) {
                 commands.add("aload " + slotOf(functionName.getName()));
@@ -293,6 +292,8 @@ public class CodeGenerator extends Visitor<String> {
             commands.add(createArray(tempVar, accessExpression.getArguments()));
             commands.add("aload " + tempVar);
             commands.add("invokevirtual Fptr/invoke(Ljava/util/ArrayList;)Ljava/lang/Object;");
+            if (returnTypes.get(functionName.getName()) == null || returnTypes.get(functionName.getName()) instanceof NoType)
+                commands.add("pop");
         }
 
         else {
@@ -309,11 +310,8 @@ public class CodeGenerator extends Visitor<String> {
                     commands.add("checkcast java/lang/Boolean");
                 else if (elementType instanceof StringType)
                     commands.add("checkcast java/lang/String");
-
             }
-
         }
-            //TODO
         return String.join("\n", commands);
     }
     @Override
@@ -321,7 +319,7 @@ public class CodeGenerator extends Visitor<String> {
         ArrayList<String> stmts = new ArrayList<>();
         Type typeR = assignStatement.getAssignExpression().accept(typeChecker);
 
-        int index = slotOf(((Identifier) assignStatement.getAssignedId()).getName());
+        int index = slotOf(assignStatement.getAssignedId().getName());
         if (assignStatement.isAccessList()) {
             stmts.add("aload " + index);
             stmts.add("checkcast List");
@@ -405,9 +403,8 @@ public class CodeGenerator extends Visitor<String> {
 
         stmts.add("goto " + exitL);
         stmts.add(elseL + ":");
-        if (!ifStatement.getElseBody().isEmpty())
-            for (var stmt : ifStatement.getElseBody())
-                stmts.add(stmt.accept(this));
+        for (var stmt : ifStatement.getElseBody())
+            stmts.add(stmt.accept(this));
 
         stmts.add(exitL + ":");
         SymbolTable.pop();

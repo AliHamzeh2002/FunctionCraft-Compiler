@@ -1,16 +1,13 @@
-def calcPow(a, b)
-    sum = 1;
-    i = 0;
-    loop do
-        if(i == b)
-            break;
-        end
-        sum = sum * a;
-        ++i;
+def mult_or_sum(x, y, flag)
+    res = 0;
+    if(flag)
+        return x + y;
+    else
+        return x * y;
     end
-    return sum;
 end
 
+
 def main()
-    puts(calcPow(3, 5));
+  puts(mult_or_sum(3, 4, true));
 end

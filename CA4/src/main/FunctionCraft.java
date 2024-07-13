@@ -26,13 +26,13 @@ public class FunctionCraft {
         TypeChecker typeChecker = new TypeChecker();
         typeChecker.visit(program);
         typeChecker.typeErrors.sort(Comparator.comparingInt(CompileError::getLine));
-        FileWriter fileWriter = new FileWriter("./samples/typeCheckErrors.txt");
-        PrintWriter printWriter = new PrintWriter(fileWriter);
+        //FileWriter fileWriter = new FileWriter("./samples/typeCheckErrors.txt");
+        //PrintWriter printWriter = new PrintWriter(fileWriter);
         for(CompileError compileError : typeChecker.typeErrors){
-            printWriter.println(compileError.getErrorMessage());
+            //printWriter.println(compileError.getErrorMessage());
             System.out.println(compileError.getErrorMessage());
         }
-        fileWriter.close();
+        //fileWriter.close();
         CodeGenerator codeGenerator = new CodeGenerator(typeChecker);
         codeGenerator.visit(program);
 

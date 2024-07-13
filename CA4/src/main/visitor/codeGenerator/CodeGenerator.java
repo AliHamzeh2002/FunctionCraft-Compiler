@@ -370,7 +370,6 @@ public class CodeGenerator extends Visitor<String> {
             return new BinaryExpression(assignStatement.getAssignedId(), assignStatement.getAssignExpression(), operator);
         }
     }
-
     @Override
     public String visit(IfStatement ifStatement){
         SymbolTable.push(ifStatement.getSymbolTable());
@@ -387,8 +386,8 @@ public class CodeGenerator extends Visitor<String> {
         stmts.add(thenL + ":");
         for (var stmt : ifStatement.getThenBody())
             stmts.add(stmt.accept(this));
-
-        stmts.add("goto " + exitL);
+        if (!stmts.getLast().contains("return"))
+            stmts.add("goto " + exitL);
         stmts.add(elseL + ":");
         for (var stmt : ifStatement.getElseBody())
             stmts.add(stmt.accept(this));

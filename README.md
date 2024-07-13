@@ -195,7 +195,7 @@ Note that for the simplicity of the project, we didn't implement these features 
 10. for loop, range expression
 
 ## How to Use
-In order to compile and run the a FunctionCraft program, clone the repository and navigate to the [build](./build) directory. Then run the following commands:
+In order to compile and run a FunctionCraft program, clone the repository and navigate to the [build](./build) directory. Then run the following commands:
 
 ```
 java -jar FunctionCraft.jar PATH_TO_INPUT_FILE

@@ -1,0 +1,25 @@
+def is_prime(n)
+  if (n < 2)
+    return false;
+  end
+  i = 2;
+  loop do
+    if (i * i > n)
+      break;
+    end
+    h = n;
+    h %= i;
+    if (h == 0)
+      return false;
+    end
+    i += 1;
+  end
+  return true;
+
+end
+
+
+def main()
+  n = 91;
+  puts(is_prime(n));
+end

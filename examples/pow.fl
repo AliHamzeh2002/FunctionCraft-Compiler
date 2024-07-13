@@ -1,0 +1,13 @@
+def main()
+    n = 100;
+    i = 0;
+    loop do
+        n = n / 2;
+        if (n == 0)
+            break;
+        end
+        i += 1;
+    end
+    puts(i);
+
+end

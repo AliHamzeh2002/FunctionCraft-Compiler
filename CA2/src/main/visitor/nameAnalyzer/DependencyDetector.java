@@ -82,7 +82,8 @@ public class DependencyDetector extends Visitor<Void> {
         forStatement.getRangeExpressions().forEach(e -> e.accept(this));
         forStatement.getLoopBody().forEach(e -> e.accept(this));
         forStatement.getLoopBodyExpressions().forEach(e -> e.accept(this));
-        forStatement.getReturnStatement().accept(this);
+        if (forStatement.getReturnStatement() != null)
+            forStatement.getReturnStatement().accept(this);
         return null;
     }
 
@@ -90,7 +91,8 @@ public class DependencyDetector extends Visitor<Void> {
     public Void visit(LoopDoStatement loopDoStatement) {
         loopDoStatement.getLoopConditions().forEach(e -> e.accept(this));
         loopDoStatement.getLoopBodyStmts().forEach(e -> e.accept(this));
-        loopDoStatement.getLoopRetStmt().accept(this);
+        if (loopDoStatement.getLoopRetStmt() != null)
+            loopDoStatement.getLoopRetStmt().accept(this);
         return null;
     }
 

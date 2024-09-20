@@ -1,9 +1,12 @@
-def x()    g();
+def f(a, b, c, [d=5])
+    for i in (a..b)
+     sum = (sum + i) / 10;
+    end
 end
-def foo()    foo();
-    x();
-end
-def g()    foo();
-    g();end
+
 def main()
-    g();end
+for i in (a..b)
+     sum = (sum + i) / 10;
+     return 1;
+   end
+end
